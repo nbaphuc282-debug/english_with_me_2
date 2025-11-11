@@ -207,6 +207,14 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transform: translateY(-2px);
         }
+        
+        /* MỚI: CSS cho nút bị vô hiệu hóa */
+        .btn:disabled {
+            background-color: #94a3b8; /* Tailwind slate-400 */
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
 
         .btn-back {
             background-color: #64748b; /* Tailwind slate-500 */
@@ -567,6 +575,11 @@
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 1px solid #e5e7eb;
+        }
+        .lesson-section:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
         .lesson-section h2 {
             color: var(--primary-color);
@@ -1644,16 +1657,33 @@
             </div>
         </div> <!-- Kết thúc #page-globalsuccess -->
 
-        <!-- Trang 11: Hồ sơ -->
+        <!-- CẬP NHẬT: Trang 11: Hồ sơ -->
         <div id="page-profile" class="page">
             <div class="subpage-container">
                 <h1>Hồ sơ của bạn</h1>
+                
+                <!-- PHẦN THÔNG TIN TÀI KHOẢN (Đã có) -->
                 <div class="lesson-section">
                     <h2>Thông tin tài khoản</h2>
                     <p>Email: <strong id="profile-email" class="text-primary-DEFAULT">...</strong></p>
                     <p>UserID: <strong id="profile-userid" class="text-slate-500 text-sm">...</strong></p>
                 </div>
                 
+                <!-- MỚI: PHẦN CẬP NHẬT THÔNG TIN -->
+                <div class="lesson-section">
+                    <h2>Cập nhật thông tin</h2>
+                    <form id="profile-update-form">
+                        <div id="profile-message" class="auth-message" style="display: none;"></div>
+                        <div class="form-group">
+                            <label for="profile-display-name">Tên hiển thị</label>
+                            <p class="text-sm text-slate-500 mb-2">Tên này sẽ xuất hiện trên Bảng xếp hạng và trong các Bình luận của bạn.</p>
+                            <input type="text" id="profile-display-name" required minlength="3">
+                        </div>
+                        <button type="submit" class="btn">Lưu thay đổi</button>
+                    </form>
+                </div>
+                
+                <!-- PHẦN TIẾN ĐỘ QUIZ (Đã có) -->
                 <div class="lesson-section">
                     <h2>Tiến độ học tập (Bài kiểm tra)</h2>
                     <div id="profile-quiz-results">
@@ -1661,6 +1691,7 @@
                     </div>
                 </div>
                 
+                <!-- PHẦN TIẾN ĐỘ BÀI HỌC (Đã có) -->
                 <div class="lesson-section">
                     <h2>Tiến độ bài học (Đã hoàn thành)</h2>
                     <div id="profile-lesson-progress">
@@ -1896,7 +1927,7 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
             : {
-               apiKey: "AIzaSyBPAQ8jldVTwtB_uAzz0-oGcZiUaJ3NeyU",
+                apiKey: "AIzaSyBPAQ8jldVTwtB_uAzz0-oGcZiUaJ3NeyU",
   authDomain: "ewmp-abc18.firebaseapp.com",
   projectId: "ewmp-abc18",
   storageBucket: "ewmp-abc18.firebasestorage.app",
@@ -1980,6 +2011,9 @@
         let profileEmailEl, profileUserIdEl, profileLogoutBtn;
         let profileQuizResultsEl;
         let profileLessonProgressEl;
+        
+        // MỚI: Biến cho form cập nhật hồ sơ
+        let profileUpdateForm, profileDisplayNameInput, profileMessageEl;
 
         // Biến cho tính năng AI
         let wordLoadingEl, wordDisplayEl, wordImageEl, wordTermEl, wordDefinitionEl, wordExampleEl, wordErrorEl, newWordBtn;
@@ -2146,6 +2180,53 @@
                 window.showPage('home');
             } catch (error) {
                 console.error("Lỗi đăng xuất: ", error);
+            }
+        }
+        
+        // MỚI: Hàm xử lý cập nhật hồ sơ
+        async function handleUpdateProfile(event) {
+            event.preventDefault();
+            if (!currentUser) {
+                showCustomAlert("Bạn cần đăng nhập!");
+                return;
+            }
+
+            const newName = profileDisplayNameInput.value.trim();
+            if (newName.length < 3) {
+                profileMessageEl.textContent = 'Tên hiển thị phải có ít nhất 3 ký tự.';
+                profileMessageEl.className = 'auth-message error';
+                profileMessageEl.style.display = 'block';
+                return;
+            }
+            
+            profileMessageEl.style.display = 'none';
+            const button = event.target.querySelector('button');
+            button.disabled = true;
+
+            // Chúng ta sẽ lưu/cập nhật tên hiển thị vào cùng tài liệu với Bảng xếp hạng
+            // vì đây là dữ liệu công khai.
+            const docRef = doc(db, "artifacts", appId, "public", "data", "leaderboard", currentUser.uid);
+
+            try {
+                // Dùng setDoc + merge để tạo mới hoặc cập nhật tài liệu này
+                await setDoc(docRef, {
+                    displayName: newName,
+                    userId: currentUser.uid,
+                    email: currentUser.email || null, // Lưu email để tham khảo
+                    lastUpdated: new Date()
+                }, { merge: true }); // merge: true rất quan trọng để không ghi đè điểm (totalScore)
+
+                profileMessageEl.textContent = 'Cập nhật thành công!';
+                profileMessageEl.className = 'auth-message success';
+                profileMessageEl.style.display = 'block';
+
+            } catch (error) {
+                console.error("Lỗi cập nhật hồ sơ:", error);
+                profileMessageEl.textContent = 'Lỗi khi cập nhật. Vui lòng thử lại.';
+                profileMessageEl.className = 'auth-message error';
+                profileMessageEl.style.display = 'block';
+            } finally {
+                button.disabled = false;
             }
         }
 
@@ -2345,10 +2426,30 @@
             }
         }
 
+        // CẬP NHẬT: Hàm tải dữ liệu hồ sơ
         async function loadProfileData() {
             if (currentUser) {
                 profileEmailEl.textContent = currentUser.email || 'Không có (Tài khoản ẩn danh)';
                 profileUserIdEl.textContent = currentUser.uid;
+                
+                // MỚI: Tải tên hiển thị
+                profileDisplayNameInput.value = ''; // Xóa giá trị cũ
+                profileMessageEl.style.display = 'none'; // Ẩn thông báo
+                
+                try {
+                    // Đọc từ tài liệu leaderboard (public)
+                    const docRef = doc(db, "artifacts", appId, "public", "data", "leaderboard", currentUser.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists() && docSnap.data().displayName) {
+                        profileDisplayNameInput.value = docSnap.data().displayName;
+                    } else if (currentUser.email) {
+                        // Gợi ý tên từ email nếu chưa đặt
+                        profileDisplayNameInput.value = currentUser.email.split('@')[0];
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi tải tên hiển thị:", error);
+                }
+                
             }
 
             profileQuizResultsEl.innerHTML = '<p>Đang tải kết quả...</p>';
@@ -2832,6 +2933,7 @@
             lessonUnsubscribers[lessonId] = unsubscribe;
         }
 
+        // CẬP NHẬT: Hàm render bình luận
         function renderComment(lessonId, data) {
             const commentListEl = document.getElementById(`comment-list-${lessonId}`);
             if (!commentListEl) return;
@@ -2840,18 +2942,23 @@
             item.className = 'comment-item';
             
             const timestamp = data.timestamp?.seconds ? new Date(data.timestamp.seconds * 1000) : new Date();
-            const emailName = data.email ? data.email.split('@')[0] : (data.userId ? data.userId.substring(0, 6) : 'Anonymous');
+            
+            // CẬP NHẬT: Ưu tiên displayName, sau đó đến email, cuối cùng là userId
+            const name = data.displayName 
+                       || (data.email ? data.email.split('@')[0] : 
+                          (data.userId ? `User-${data.userId.substring(0, 6)}` : 'Anonymous'));
             
             const safeText = data.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
             
             item.innerHTML = `
-                <strong>${emailName}</strong>
+                <strong>${name}</strong>
                 <p>${safeText}</p>
                 <small>${timestamp.toLocaleString('vi-VN')}</small>
             `;
             commentListEl.appendChild(item);
         }
 
+        // CẬP NHẬT: Hàm đăng bình luận
         window.postComment = async (lessonId) => {
             const inputEl = document.getElementById(`comment-input-${lessonId}`);
             const formEl = document.getElementById(`comment-form-${lessonId}`);
@@ -2874,6 +2981,19 @@
                 return;
             }
             
+            // MỚI: Lấy tên hiển thị hiện tại để lưu vào bình luận
+            let displayName = currentUser.email ? currentUser.email.split('@')[0] : `User-${currentUser.uid.substring(0, 6)}`; // Fallback
+            try {
+                const profileDocRef = doc(db, "artifacts", appId, "public", "data", "leaderboard", currentUser.uid);
+                const profileSnap = await getDoc(profileDocRef);
+                if (profileSnap.exists() && profileSnap.data().displayName) {
+                    displayName = profileSnap.data().displayName;
+                }
+            } catch (e) {
+                console.warn("Không thể lấy tên hiển thị, dùng tên mặc định.", e);
+            }
+            // Kết thúc MỚI
+
             const collRef = collection(db, "artifacts", appId, "public", "data", "lessonComments");
             
             try {
@@ -2884,6 +3004,7 @@
                     text: text,
                     userId: currentUser.uid,
                     email: currentUser.email || null,
+                    displayName: displayName, // <-- MỚI: Lưu tên hiển thị
                     timestamp: new Date()
                 });
                 inputEl.value = '';
@@ -3054,6 +3175,7 @@
 
         // --- 9. TÍNH NĂNG BẢNG XẾP HẠNG (Viết điểm) ---
 
+        // CẬP NHẬT: Hàm cập nhật điểm
         async function updateUserScore(scoreToAdd) {
             if (!currentUser || currentUser.isAnonymous) {
                 console.log("Không lưu điểm (khách/ẩn danh).");
@@ -3064,13 +3186,26 @@
 
             const docRef = doc(db, "artifacts", appId, "public", "data", "leaderboard", currentUser.uid);
 
+            // MỚI: Đọc tên hiển thị hiện tại trước khi ghi đè
+            let currentDisplayName = currentUser.email ? currentUser.email.split('@')[0] : `User-${currentUser.uid.substring(0, 6)}`;
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists() && docSnap.data().displayName) {
+                    currentDisplayName = docSnap.data().displayName;
+                }
+            } catch (e) {
+                console.warn("Không thể đọc tên hiển thị hiện tại, sẽ dùng tên mặc định.", e);
+            }
+            // Kết thúc MỚI
+
             try {
                 await setDoc(docRef, {
                     totalScore: increment(scoreToAdd),
                     userId: currentUser.uid,
-                    displayName: currentUser.email ? currentUser.email.split('@')[0] : currentUser.uid.substring(0, 6),
+                    displayName: currentDisplayName, // <-- CẬP NHẬT: Dùng tên đã đọc
+                    email: currentUser.email || null, // Thêm/cập nhật email
                     lastUpdated: new Date()
-                }, { merge: true });
+                }, { merge: true }); // merge: true đảm bảo totalScore được cộng dồn
 
                 console.log(`Đã cập nhật ${scoreToAdd} điểm cho user ${currentUser.uid} (public)`);
                 
@@ -3081,6 +3216,7 @@
         
         // --- 10. TÍNH NĂNG BẢNG XẾP HẠNG (Đọc điểm) ---
 
+        // CẬP NHẬT: Hàm tải Bảng xếp hạng
         async function loadLeaderboard() {
             leaderboardContainerEl.innerHTML = '<p id="leaderboard-loading">Đang tải bảng xếp hạng...</p>';
             
@@ -3118,7 +3254,10 @@
                 
                 top10.forEach((data, index) => {
                     const rank = index + 1;
-                    const name = data.displayName || data.userId.substring(0, 6) || 'Anonymous';
+                    // CẬP NHẬT: Cải thiện fallback tên
+                    const name = data.displayName 
+                               || (data.email ? data.email.split('@')[0] : 
+                                  (data.userId ? `User-${data.userId.substring(0, 6)}` : 'Anonymous'));
                     const score = data.totalScore || 0;
                     
                     html += `
@@ -3203,6 +3342,11 @@
             profileLogoutBtn = document.getElementById('profile-logout-btn');
             profileQuizResultsEl = document.getElementById('profile-quiz-results');
             profileLessonProgressEl = document.getElementById('profile-lesson-progress');
+            
+            // MỚI: Gán element cho form hồ sơ
+            profileUpdateForm = document.getElementById('profile-update-form');
+            profileDisplayNameInput = document.getElementById('profile-display-name');
+            profileMessageEl = document.getElementById('profile-message');
 
             // Gán element cho Quiz
             quizTitleEl = document.getElementById('quiz-title');
@@ -3253,6 +3397,9 @@
             // Thêm trình xử lý sự kiện
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('register-form').addEventListener('submit', handleRegister);
+            
+            // MỚI: Thêm trình xử lý sự kiện cho form hồ sơ
+            profileUpdateForm.addEventListener('submit', handleUpdateProfile);
             
             wcGridEl.addEventListener('mousedown', handleWCGridMouseStart);
             document.addEventListener('mousemove', handleWCGridMouseMove);
