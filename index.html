@@ -3,34 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- CẬP NHẬT: Thay đổi tiêu đề -->
-    <title>English With Me - Website Học Tiếng Anh (v5 - Cập nhật đề thi)</title>
-    <!-- Nhúng font Inter từ Google Fonts -->
+    <title>English With Me - Website Học Tiếng Anh (v6 - Giao diện mới)</title>
+    
+    <!-- Nhúng font Inter & Pacifico từ Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Pacifico&display=swap" rel="stylesheet">
     
+    <!-- MỚI: Nhúng Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- CẬP NHẬT: Cấu hình Tailwind (tùy chọn, nhưng hữu ích) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'logo': ['Pacifico', 'cursive'],
+                    },
+                    colors: {
+                        'primary': {
+                            'DEFAULT': '#0ea5e9', // sky-500
+                            'hover': '#0284c7', // sky-600
+                        },
+                        'secondary': {
+                            'DEFAULT': '#8b5cf6', // violet-500
+                            'hover': '#7c3aed', // violet-600
+                        },
+                        'light-bg': '#f0f9ff', // sky-50
+                        'ai-bg': '#faf5ff', // purple-50
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
         /* Cài đặt chung & Reset */
         :root {
-            --primary-color: #007bff;
-            --primary-hover: #0056b3;
-            --light-blue-bg: #e0f7fa;
-            --dark-text: #333;
-            --dark-red: #c62828;
-            --success-green: #28a745;
-            --success-green-hover: #218838;
-            /* MỚI: Màu cho tính năng AI */
-            --ai-purple: #6f42c1;
-            --ai-purple-hover: #5a359a;
-            --ai-bg: #f5f3f7;
+            /* CẬP NHẬT: Bảng màu mới, thân thiện hơn */
+            --primary-color: #0ea5e9; /* Tailwind sky-500 */
+            --primary-hover: #0284c7; /* Tailwind sky-600 */
+            --light-blue-bg: #f0f9ff; /* Tailwind sky-50 */
+            --dark-text: #1f2937;     /* Tailwind gray-800 */
+            --medium-text: #4b5563;  /* Tailwind gray-600 */
+            --dark-red: #dc2626;      /* Tailwind red-600 */
+            --success-green: #16a34a;  /* Tailwind green-600 */
+            --success-green-hover: #15803d; /* Tailwind green-700 */
+            
+            --ai-purple: #8b5cf6;     /* Tailwind violet-500 */
+            --ai-purple-hover: #7c3aed; /* Tailwind violet-600 */
+            --ai-bg: #faf5ff;       /* Tailwind purple-50 */
+            
+            --bg-soft: #f8fafc;       /* Tailwind slate-50 */
         }
 
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            /* CẬP NHẬT: Sử dụng màu nền nhẹ nhàng hơn */
+            background-color: var(--bg-soft);
             color: var(--dark-text);
             line-height: 1.6;
         }
@@ -39,7 +73,7 @@
 
         /* Top Bar (Đăng nhập/Đăng ký) */
         .top-bar {
-            background-color: #2c2c2c;
+            background-color: #1e293b; /* Tailwind slate-800 */
             color: white;
             padding: 8px 10%;
             text-align: right;
@@ -51,7 +85,7 @@
             text-decoration: none;
             margin-left: 15px;
             transition: opacity 0.3s;
-            cursor: pointer; /* Đã có cursor:pointer từ showPage */
+            cursor: pointer;
         }
 
         .top-bar a:hover {
@@ -63,26 +97,27 @@
             background-color: white;
             text-align: center;
             padding: 25px 20px;
-            border-bottom: 1px solid #e0e0e0;
+            /* CẬP NHẬT: Thêm bóng mờ nhẹ */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
         .header .logo {
-            /* Sử dụng font 'Pacifico' để giả lập chữ viết tay */
             font-family: 'Pacifico', cursive;
             font-size: 3em;
-            color: #2a2a2a;
+            color: #1f2937; /* Tailwind gray-800 */
             margin: 0;
             text-decoration: none;
         }
 
         /* Navbar (Menu) */
         .navbar {
-            background-color: #000;
+            background-color: #334155; /* Tailwind slate-700 */
             padding: 10px 0;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .navbar a {
@@ -92,22 +127,24 @@
             display: inline-block;
             font-weight: 700;
             transition: background-color 0.3s;
-            cursor: pointer; /* Đổi con trỏ thành pointer */
+            cursor: pointer;
+            border-radius: 6px; /* Bo góc nhẹ cho menu */
+            margin: 0 4px;
         }
 
         .navbar a:hover,
         .navbar a.active-nav {
-            background-color: #444;
+            background-color: #475569; /* Tailwind slate-600 */
         }
 
         /* Footer (Chân trang) */
         .footer {
-            background-color: #f4f4f4;
-            color: #777;
+            background-color: #e2e8f0; /* Tailwind slate-200 */
+            color: #475569; /* Tailwind slate-600 */
             text-align: center;
             padding: 25px;
             margin-top: 40px;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid #cbd5e1; /* Tailwind slate-300 */
             font-size: 0.9em;
         }
 
@@ -117,14 +154,24 @@
         .subpage-container {
             max-width: 1200px;
             margin: 30px auto;
-            padding: 20px;
+            /* CẬP NHẬT: Thêm padding lớn hơn, bo góc và bóng mờ hiện đại */
+            padding: 2rem 1.5rem; /* 32px 24px */
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-radius: 1.5rem; /* 24px, bo góc lớn */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        @media (min-width: 768px) {
+            .subpage-container {
+                padding: 3rem; /* 48px */
+            }
         }
 
         .subpage-container h1 {
             text-align: center;
+            /* CẬP NHẬT: Chữ to, đậm hơn */
+            font-size: 2.25rem; /* 36px */
+            font-weight: 800;
             color: #000;
             margin-bottom: 30px;
         }
@@ -138,36 +185,42 @@
             display: block;
         }
 
-        /* Nút chung */
+        /* Nút chung (CẬP NHẬT với Tailwind @apply) */
         .btn {
+            display: inline-block;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
+            padding: 12px 24px; /* Tăng padding */
+            border-radius: 0.75rem; /* 12px, bo góc lớn */
             cursor: pointer;
             font-weight: 700;
             text-decoration: none;
-            transition: background-color 0.3s;
+            /* CẬP NHẬT: Thêm hiệu ứng bóng và transition */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
         }
 
         .btn:hover {
             background-color: var(--primary-hover);
+            /* CẬP NHẬT: Hiệu ứng nhấc lên khi hover */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
         }
 
         .btn-back {
-            background-color: #6c757d;
+            background-color: #64748b; /* Tailwind slate-500 */
             margin-bottom: 20px;
         }
         .btn-back:hover {
-            background-color: #5a6268;
+            background-color: #475569; /* Tailwind slate-600 */
         }
 
         /* 3. Trang chủ (Home Page) */
 
         /* Hero Section */
         .hero {
-            background-color: var(--light-blue-bg); /* Màu xanh nhạt từ hình ảnh */
+            background-color: var(--light-blue-bg);
             padding: 60px 20px;
             text-align: center;
         }
@@ -179,11 +232,17 @@
         }
 
         .hero-content h2 {
-            font-size: 2.2em;
-            color: var(--dark-red); /* Màu đỏ đậm */
-            font-weight: 700;
+            /* CẬP NHẬT: Chữ to, đậm, màu sắc ấn tượng */
+            font-size: 2.5em; /* 40px */
+            color: #1e3a8a; /* Tailwind blue-900 */
+            font-weight: 800; /* Extra-bold */
             margin: 0;
             line-height: 1.3;
+        }
+        @media (min-width: 768px) {
+            .hero-content h2 {
+                font-size: 3em; /* 48px */
+            }
         }
 
         /* Welcome Section */
@@ -195,6 +254,7 @@
 
         .welcome h2 {
             font-size: 2em;
+            font-weight: 700; /* Thêm độ đậm */
             color: #000;
             margin-bottom: 15px;
         }
@@ -203,12 +263,12 @@
             max-width: 700px;
             margin: 0 auto;
             font-size: 1.1em;
-            color: #555;
+            color: var(--medium-text);
         }
 
         /* Features Section */
         .features {
-            background-color: var(--light-blue-bg); /* Cùng màu xanh với Hero */
+            background-color: var(--light-blue-bg);
             padding: 60px 20px;
         }
 
@@ -216,36 +276,57 @@
             display: flex;
             justify-content: center;
             gap: 30px;
-            flex-wrap: wrap; /* Cho phép xuống hàng trên di động */
+            flex-wrap: wrap;
         }
 
-        /* Thẻ tính năng (phải là thẻ <a>) */
+        /* Thẻ tính năng (CẬP NHẬT) */
         .feature-card {
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 1rem; /* 16px */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             width: 300px;
             padding: 25px;
             text-align: center;
             text-decoration: none;
             color: var(--dark-text);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            /* CẬP NHẬT: Hiệu ứng transition mượt hơn */
+            transition: all 0.3s ease-in-out;
             cursor: pointer;
         }
 
         .feature-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         .feature-card h3 {
             font-size: 1.5em;
+            font-weight: 700;
             color: #000;
             margin-top: 0;
             margin-bottom: 15px;
         }
         
-        /* MỚI: CSS TÍNH NĂNG TỪ VỰNG MỖI NGÀY (AI) */
+        /* MỚI: CSS cho icon trong feature card */
+        .feature-card-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px auto;
+            /* Căn icon SVG bên trong */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Màu nền icon */
+            background-color: var(--light-blue-bg);
+            border-radius: 50%;
+        }
+        .feature-card-icon svg {
+            width: 32px;
+            height: 32px;
+            color: var(--primary-color);
+        }
+        
+        /* MỚI: CSS TÍNH NĂNG TỪ VỰNG MỖI NGÀY (AI) (CẬP NHẬT) */
         .word-of-the-day {
             background-color: var(--ai-bg);
             padding: 60px 20px;
@@ -253,6 +334,7 @@
         }
         .word-of-the-day h2 {
             font-size: 2em;
+            font-weight: 700; /* Thêm độ đậm */
             color: var(--ai-purple);
             margin-top: 0;
             margin-bottom: 30px;
@@ -261,8 +343,8 @@
             max-width: 800px;
             margin: 0 auto;
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-radius: 1rem; /* 16px */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             padding: 30px;
             display: grid;
             grid-template-columns: 1fr;
@@ -270,7 +352,7 @@
             align-items: center;
         }
         
-        /* Spinner CSS */
+        /* Spinner CSS (CẬP NHẬT: Dùng Tailwind classes trong HTML) */
         .loader {
             width: 50px;
             height: 50px;
@@ -291,8 +373,8 @@
         .word-image-container {
             width: 100%;
             height: 250px;
-            background-color: #eee;
-            border-radius: 8px;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            border-radius: 0.75rem; /* 12px */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -312,16 +394,19 @@
         }
         #word-definition {
             font-size: 1.1em;
-            color: #555;
+            color: var(--medium-text);
             margin: 10px 0;
         }
         #word-example {
             font-size: 1.1em;
-            color: #333;
+            color: var(--dark-text);
             font-style: italic;
             border-left: 4px solid var(--ai-purple);
             padding-left: 10px;
             margin: 15px 0 0 0;
+            background-color: #f9fafb; /* Tailwind gray-50 */
+            padding-top: 8px;
+            padding-bottom: 8px;
         }
         
         .btn-ai {
@@ -350,7 +435,7 @@
         }
 
 
-        /* 4. Trang Video Hướng Dẫn */
+        /* 4. Trang Video Hướng Dẫn (CẬP NHẬT) */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -358,16 +443,18 @@
         }
 
         .video-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 1rem; /* 16px */
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: box-shadow 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
             cursor: pointer;
+            background-color: white;
         }
 
         .video-item:hover {
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
         }
 
         .video-item img {
@@ -378,15 +465,20 @@
         }
 
         .video-item-content {
-            padding: 15px;
+            padding: 20px;
         }
 
         .video-item-content h3 {
             margin-top: 0;
             font-size: 1.2em;
+            font-weight: 700;
+        }
+        .video-item-content p {
+            font-size: 0.95em;
+            color: var(--medium-text);
         }
 
-        /* 5. Trang Đề Ôn Thi */
+        /* 5. Trang Đề Ôn Thi (CẬP NHẬT) */
         .test-list {
             display: flex;
             flex-direction: column;
@@ -397,59 +489,71 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap; /* Xuống hàng trên di động */
+            flex-wrap: wrap;
             gap: 15px;
             padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fafafa;
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 0.75rem; /* 12px */
+            background-color: #f9fafb; /* Tailwind gray-50 */
+            transition: all 0.2s ease-in-out;
+        }
+        .test-item:hover {
+            background-color: white;
+            border-color: #d1d5db; /* Tailwind gray-300 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .test-info h3 {
             margin: 0 0 5px 0;
+            font-weight: 700;
         }
 
         .test-info p {
             margin: 0;
             font-size: 0.9em;
-            color: #666;
+            color: var(--medium-text);
         }
 
-        /* General Content Grid (for Cambridge/Global Success) */
+        /* General Content Grid (for Cambridge/Global Success) (CẬP NHẬT) */
         .content-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
         }
         .content-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem; /* 16px */
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: box-shadow 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
             text-align: center;
-            padding: 20px;
+            padding-bottom: 20px; /* Di chuyển padding xuống dưới */
         }
         .content-item:hover {
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
         }
         .content-item img {
             width: 100%;
             height: 150px;
             object-fit: cover;
-            border-radius: 5px;
             margin-bottom: 15px;
-            background-color: #f0f0f0;
+            background-color: #f3f4f6;
+        }
+        .content-item-text {
+            padding: 0 20px; /* Thêm padding cho text */
         }
         .content-item h3 {
             margin-top: 0;
             font-size: 1.2em;
+            font-weight: 700;
         }
         .content-item .btn {
             margin-top: 15px;
         }
         
-        /* MỚI: Icon hoàn thành bài học */
+        /* Icon hoàn thành bài học */
         .completion-icon {
             color: var(--success-green);
             font-weight: bold;
@@ -462,21 +566,26 @@
         .lesson-section {
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e5e7eb;
         }
         .lesson-section h2 {
             color: var(--primary-color);
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 5px;
             display: inline-block;
+            font-weight: 700; /* Thêm độ đậm */
         }
         .lesson-section ul {
             list-style-type: disc;
             margin-left: 20px;
             line-height: 1.8;
+            color: var(--medium-text);
+        }
+        .lesson-section p {
+            color: var(--medium-text);
         }
         
-        /* MỚI: Nút hoàn thành bài học */
+        /* Nút hoàn thành bài học */
         .btn-complete {
             background-color: var(--success-green);
             margin-top: 20px;
@@ -489,12 +598,12 @@
         }
         .btn-complete.completed,
         .btn-complete:disabled {
-            background-color: #6c757d;
+            background-color: #64748b; /* Tailwind slate-500 */
             cursor: not-allowed;
             opacity: 0.8;
         }
 
-        /* 6. Trang Game Ôn Tập */
+        /* 6. Trang Game Ôn Tập (CẬP NHẬT) */
         .game-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -502,28 +611,35 @@
         }
 
         .game-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem; /* 16px */
             text-align: center;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: box-shadow 0.3s;
+            padding-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
         }
 
         .game-card:hover {
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
         }
 
         .game-card img {
             width: 100%;
             height: 150px;
             object-fit: cover;
-            border-radius: 5px;
             margin-bottom: 15px;
+        }
+        
+        .game-card-text {
+             padding: 0 20px; /* Thêm padding cho text */
         }
 
         .game-card h3 {
             margin: 0 0 15px 0;
+            font-weight: 700;
         }
 
         /* 7. Responsive */
@@ -552,7 +668,6 @@
             .modal-content {
                 width: 95% !important;
             }
-            /* MỚI: Responsive cho game */
             .flashcard-grid-container {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -573,15 +688,14 @@
         
         /* 8. CSS TÍNH NĂNG MỚI (Cũ) */
         
-        /* Form Đăng nhập / Đăng ký */
+        /* Form Đăng nhập / Đăng ký (CẬP NHẬT) */
         .auth-form-container {
             max-width: 450px;
             margin: 40px auto;
             padding: 30px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fafafa;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-radius: 1rem; /* 16px */
+            background-color: var(--bg-soft);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .form-group {
             margin-bottom: 20px;
@@ -591,13 +705,21 @@
             margin-bottom: 5px;
             font-weight: 700;
         }
+        /* CẬP NHẬT: Input field hiện đại hơn */
         .form-group input {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box; /* Đảm bảo padding không làm hỏng layout */
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 0.5rem; /* 8px */
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3); /* Ring color */
+        }
+        
         .auth-form-container .btn {
             width: 100%;
             padding: 15px;
@@ -620,21 +742,21 @@
             margin-bottom: 15px;
             padding: 12px;
             border-radius: 5px;
-            display: none; /* Ẩn ban đầu */
+            display: none; 
             text-align: center;
         }
         .auth-message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
         .auth-message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
-        /* Video Modal */
+        /* Video Modal (CẬP NHẬT) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -650,10 +772,11 @@
         .modal-content {
             background: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 1rem; /* 16px */
             width: 70%;
             max-width: 800px;
             position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         .modal-close {
             position: absolute;
@@ -661,21 +784,21 @@
             right: 20px;
             font-size: 2.5em;
             font-weight: bold;
-            color: #aaa;
+            color: #9ca3af;
             cursor: pointer;
         }
         .modal-close:hover {
-            color: #333;
+            color: #1f2937;
         }
         .video-player-container {
             width: 100%;
             margin-top: 15px;
-            /* Aspect ratio 16:9 */
             position: relative;
             padding-bottom: 56.25%; 
             height: 0;
             overflow: hidden;
             background: #000;
+            border-radius: 0.75rem; /* 12px */
         }
         .video-player-container iframe {
             position: absolute;
@@ -685,7 +808,7 @@
             height: 100%;
         }
         
-        /* Trang Quiz */
+        /* Trang Quiz (CẬP NHẬT) */
         .quiz-question-text {
             font-size: 1.5em;
             font-weight: 700;
@@ -697,28 +820,31 @@
             gap: 15px;
         }
         .quiz-option {
-            background: #f4f4f4;
-            border: 2px solid #ddd;
+            background: #f9fafb;
+            border: 2px solid #d1d5db;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 0.75rem; /* 12px */
             cursor: pointer;
             transition: all 0.3s;
+            font-weight: 500;
         }
         .quiz-option:hover {
             border-color: var(--primary-color);
+            background-color: var(--light-blue-bg);
         }
         .quiz-option.selected {
             background: var(--light-blue-bg);
             border-color: var(--primary-color);
             font-weight: bold;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
         }
         .quiz-option.correct {
-            background: #d4edda;
-            border-color: #c3e6cb;
+            background: #d1fae5;
+            border-color: #a7f3d0;
         }
         .quiz-option.wrong {
-            background: #f8d7da;
-            border-color: #f5c6cb;
+            background: #fee2e2;
+            border-color: #fecaca;
         }
         #quiz-next-btn {
             margin-top: 20px;
@@ -728,23 +854,24 @@
             font-size: 1.2em;
         }
         
-        /* MỚI: CSS Khu vực bình luận */
+        /* Khu vực bình luận (CẬP NHẬT) */
         .comment-section {
             margin-top: 40px;
-            border-top: 2px solid #eee;
+            border-top: 2px solid #e5e7eb;
             padding-top: 20px;
         }
         .comment-list {
             max-height: 400px;
             overflow-y: auto;
             margin-bottom: 20px;
-            border: 1px solid #eee;
-            border-radius: 5px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem; /* 12px */
             padding: 10px;
+            background-color: var(--bg-soft);
         }
         .comment-item {
             padding: 12px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f3f4f6;
         }
         .comment-item:last-child {
             border-bottom: none;
@@ -753,33 +880,39 @@
             display: block;
             font-size: 0.95em;
             color: var(--primary-color);
+            font-weight: 700;
         }
         .comment-item small {
             font-size: 0.8em;
-            color: #888;
+            color: #6b7280;
             display: block;
             margin-top: 2px;
         }
         .comment-item p {
             margin: 5px 0 0 0;
-            color: #444;
+            color: #374151;
         }
         .comment-form textarea {
             width: 100%;
             min-height: 80px;
             padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            border-radius: 0.5rem; /* 8px */
+            border: 1px solid #d1d5db;
             box-sizing: border-box;
             margin-bottom: 10px;
             font-family: 'Inter', sans-serif;
             font-size: 1em;
         }
+        .comment-form textarea:focus {
+             outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+        }
         .comment-form .auth-message {
-            margin-top: -5px; /* Đặt thông báo lỗi sát lên trên */
+            margin-top: -5px; 
         }
 
-        /* Trang Game Flashcard */
+        /* Trang Game Flashcard (CẬP NHẬT) */
         .flashcard-controls {
             display: flex;
             justify-content: space-between;
@@ -791,7 +924,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
-            perspective: 1000px; /* Cho hiệu ứng 3D */
+            perspective: 1000px;
         }
         .flashcard {
             width: 100%;
@@ -807,6 +940,7 @@
             transition: transform 0.6s;
             transform-style: preserve-3d;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 0.75rem; /* 12px */
         }
         .flashcard.flipped .flashcard-inner {
             transform: rotateY(180deg);
@@ -819,25 +953,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 8px;
+            border-radius: 0.75rem; /* 12px */
             font-size: 1.2em;
             font-weight: 700;
         }
         .flashcard-front {
             background-color: var(--primary-color);
             color: white;
-            /* Thêm biểu tượng (ví dụ) */
-            content: '?';
         }
         .flashcard-back {
             background-color: var(--light-blue-bg);
             color: var(--dark-text);
             transform: rotateY(180deg);
             padding: 10px;
-            box-sizing: border-box; /* Đảm bảo padding không làm hỏng layout */
+            box-sizing: border-box;
         }
         .flashcard.matched .flashcard-inner {
-            /* Giữ thẻ ngửa và mờ đi khi khớp */
             transform: rotateY(180deg);
             opacity: 0.5;
         }
@@ -845,7 +976,7 @@
             cursor: default;
         }
         
-        /* MỚI: CSS CHO GAME NỐI TỪ (WORD CONNECT) */
+        /* CSS CHO GAME NỐI TỪ (WORD CONNECT) (CẬP NHẬT) */
         .wc-game-area {
             display: flex;
             justify-content: space-around;
@@ -857,17 +988,18 @@
             width: 250px;
             max-width: 100%;
             height: 350px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem; /* 12px */
             padding: 15px;
             overflow-y: auto;
         }
         #wc-found-words h3 {
             margin-top: 0;
             text-align: center;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e5e7eb;
             padding-bottom: 10px;
+            font-weight: 700;
         }
         #wc-found-list {
             list-style-type: none;
@@ -892,14 +1024,14 @@
             grid-template-columns: repeat(3, 80px); /* 3x3 grid */
             gap: 15px;
             margin-top: 20px;
-            touch-action: none; /* Quan trọng cho touch events */
+            touch-action: none;
         }
         .wc-letter {
             width: 80px;
             height: 80px;
             background: var(--light-blue-bg);
             border: 2px solid var(--primary-color);
-            border-radius: 50%; /* Hình tròn */
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -907,7 +1039,7 @@
             font-weight: 700;
             color: var(--primary-color);
             cursor: pointer;
-            user-select: none; /* Ngăn bôi đen chữ */
+            user-select: none;
             transition: background-color 0.2s;
         }
         .wc-letter.selected {
@@ -917,8 +1049,8 @@
         #wc-current-word {
             height: 50px;
             width: 100%;
-            background: #f0f0f0;
-            border-radius: 5px;
+            background: #f3f4f6;
+            border-radius: 0.5rem; /* 8px */
             margin-top: 20px;
             display: flex;
             justify-content: center;
@@ -939,7 +1071,7 @@
             font-weight: bold;
         }
 
-        /* MỚI: CSS CHO GAME ĐIỀN VÀO CHỖ TRỐNG (FILL BLANK) */
+        /* CSS CHO GAME ĐIỀN VÀO CHỖ TRỐNG (FILL BLANK) (CẬP NHẬT) */
         .fb-game-container {
             max-width: 800px;
             margin: 0 auto;
@@ -947,7 +1079,7 @@
         }
         #fb-progress {
             font-size: 1.1em;
-            color: #777;
+            color: var(--medium-text);
             margin-bottom: 20px;
         }
         #fb-sentence-container {
@@ -961,13 +1093,15 @@
             font-size: 1.4em;
             text-align: center;
             border: none;
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
             padding: 5px;
             margin: 0 5px;
+            border-radius: 4px 4px 0 0;
+            background-color: var(--light-blue-bg);
         }
         #fb-input:focus {
             outline: none;
-            border-bottom-width: 3px;
+            background-color: #e0f2fe; /* Tailwind sky-100 */
         }
         #fb-check-btn {
             padding: 15px 30px;
@@ -990,13 +1124,14 @@
         }
         #fb-results h2 {
             font-size: 1.8em;
+            font-weight: 700;
         }
         #fb-results-score {
             font-size: 1.4em;
             margin-bottom: 20px;
         }
         
-        /* MỚI: CSS Bảng Xếp Hạng */
+        /* CSS Bảng Xếp Hạng (CẬP NHẬT) */
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
@@ -1005,21 +1140,23 @@
         }
         .leaderboard-table th,
         .leaderboard-table td {
-            border: 1px solid #ddd;
+            border: 1px solid #d1d5db;
             padding: 12px 15px;
             text-align: left;
         }
         .leaderboard-table th {
             background-color: var(--light-blue-bg);
             color: var(--primary-color);
+            font-weight: 700;
         }
         .leaderboard-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f9fafb;
         }
-        /* Icon cho top 3 */
         .leaderboard-table td:first-child {
             font-weight: bold;
+            text-align: center;
         }
+        /* Icon cho top 3 */
         .leaderboard-table tr:nth-child(1) td:first-child::before {
             content: '🥇 ';
         }
@@ -1032,16 +1169,15 @@
         
     </style>
 </head>
-<body>
+<!-- CẬP NHẬT: Thêm class nền chung -->
+<body class="bg-slate-50">
 
     <!-- PHẦN 1: CÁC THÀNH PHẦN CHUNG -->
 
     <!-- Top Bar -->
     <div class="top-bar">
-        <!-- Hiển thị khi đã đăng xuất -->
         <a id="login-link" href="#" onclick="showPage('login')">Đăng nhập</a>
         <a id="register-link" href="#" onclick="showPage('register')">Đăng ký</a>
-        <!-- Hiển thị khi đã đăng nhập -->
         <a id="profile-link" href="#" onclick="showPage('profile')" style="display: none;">Hồ sơ</a>
         <a id="logout-link" href="#" onclick="handleLogout(event)" style="display: none;">Đăng xuất</a>
     </div>
@@ -1058,7 +1194,6 @@
         <a href="#" data-page="globalsuccess" onclick="showPage('globalsuccess')">Global Success</a>
         <a href="#" data-page="tests" onclick="showPage('tests')">Tài liệu ôn thi</a>
         <a href="#" data-page="games" onclick="showPage('games')">Game</a>
-        <!-- MỚI: Thêm link Bảng xếp hạng -->
         <a href="#" data-page="leaderboard" onclick="showPage('leaderboard')">Bảng xếp hạng</a>
     </nav>
 
@@ -1068,10 +1203,11 @@
         <!-- Trang 1: Home (Mặc định hiển thị) -->
         <div id="page-home" class="page active">
             
-            <!-- Hero Section -->
+            <!-- Hero Section (CẬP NHẬT) -->
             <section class="hero">
                 <div class="hero-content">
-                    <h2>
+                    <!-- CẬP NHẬT: class Tailwind để chữ to, đậm hơn -->
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-sky-800">
                         ENGLISH LEARNING WEBSITE FOR GRADE 5<br>
                         CAMBRIDGE PROGRAM -<br>
                         GLOBAL SUCCESS PROGRAM
@@ -1090,21 +1226,25 @@
                 </p>
             </section>
             
-            <!-- MỚI: TÍNH NĂNG TỪ VỰNG MỖI NGÀY (AI) -->
+            <!-- TÍNH NĂNG TỪ VỰNG MỖI NGÀY (AI) (CẬP NHẬT) -->
             <section class="word-of-the-day">
                 <h2>Từ vựng mỗi ngày</h2>
                 <div class="word-container">
                     
-                    <!-- Trạng thái Loading -->
+                    <!-- Trạng thái Loading (CẬP NHẬT: Dùng spinner Tailwind) -->
                     <div id="word-loading">
-                        <div class="loader"></div>
-                        <p>AI đang tìm từ vựng mới...</p>
+                        <!-- Spinner mới -->
+                        <div class="flex justify-center items-center h-full">
+                            <div class="loader animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-purple-500"></div>
+                        </div>
+                        <p class="mt-4">AI đang tìm từ vựng mới...</p>
                     </div>
                     
                     <!-- Nội dung sau khi tải -->
                     <div id="word-display" style="display: none;">
-                        <div class="word-image-container">
-                            <img id="word-image" src="" alt="Hình ảnh minh họa cho từ vựng">
+                        <!-- CẬP NHẬT: Thêm class animate-pulse cho ảnh lúc chờ load -->
+                        <div class="word-image-container bg-slate-200">
+                            <img id="word-image" src="" alt="Hình ảnh minh họa cho từ vựng" class="transition-opacity duration-500 opacity-0">
                         </div>
                         <div class="word-content">
                             <h3 id="word-term"></h3>
@@ -1120,23 +1260,42 @@
             </section>
             <!-- KẾT THÚC TÍNH NĂNG AI -->
 
-            <!-- Features Section -->
+            <!-- Features Section (CẬP NHẬT: Thêm Icons) -->
             <section class="features">
                 <div class="feature-grid">
-                    <!-- Thẻ 1: Link đến trang Video -->
+                    
+                    <!-- Thẻ 1: Link đến trang Video (Thêm Icon) -->
                     <a href="#" onclick="showPage('videos')" class="feature-card">
+                        <!-- MỚI: Icon -->
+                        <div class="feature-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 0 1 0 1.971l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                            </svg>
+                        </div>
                         <h3>Video hướng dẫn</h3>
                         <p>Giải thích trực quan từng chủ đề, minh họa bằng ví dụ thực tế.</p>
                     </a>
                     
-                    <!-- Thẻ 2: Link đến trang Đề thi -->
+                    <!-- Thẻ 2: Link đến trang Đề thi (Thêm Icon) -->
                     <a href="#" onclick="showPage('tests')" class="feature-card">
+                        <!-- MỚI: Icon -->
+                        <div class="feature-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </div>
                         <h3>Tổng hợp đề ôn thi</h3>
                         <p>Hệ thống đề thi được chọn lọc, giúp bạn luyện tập và kiểm tra năng lực thật sát thực tế.</p>
                     </a>
                     
-                    <!-- Thẻ 3: Link đến trang Game -->
+                    <!-- Thẻ 3: Link đến trang Game (Thêm Icon) -->
                     <a href="#" onclick="showPage('games')" class="feature-card">
+                        <!-- MỚI: Icon -->
+                        <div class="feature-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
+                            </svg>
+                        </div>
                         <h3>Game ôn tập thú vị</h3>
                         <p>Vừa chơi vừa học với các mini game giúp ghi nhớ từ vựng tự nhiên và lâu dài.</p>
                     </a>
@@ -1145,13 +1304,12 @@
 
         </div> <!-- Kết thúc #page-home -->
 
-        <!-- Trang 2: Video Hướng Dẫn (Mặc định ẩn) -->
+        <!-- Trang 2: Video Hướng Dẫn -->
         <div id="page-videos" class="page">
             <div class="subpage-container">
                 <h1>Video Hướng Dẫn</h1>
                 <div class="video-grid">
                     <!-- Video item 1 -->
-                    <!-- CẬP NHẬT: Thay đổi onclick để truyền ID YouTube -->
                     <div class="video-item" onclick="openVideoModal('Bài 1: Thì Hiện tại đơn (Present Simple)', '2rohVIy3v1U')">
                         <img src="https://img.youtube.com/vi/2rohVIy3v1U/hqdefault.jpg" alt="Thumbnail video 1">
                         <div class="video-item-content">
@@ -1187,12 +1345,12 @@
             </div>
         </div> <!-- Kết thúc #page-videos -->
 
-        <!-- Trang 3: Tổng Hợp Đề Ôn Thi (Mặc định ẩn) -->
+        <!-- Trang 3: Tổng Hợp Đề Ôn Thi -->
         <div id="page-tests" class="page">
             <div class="subpage-container">
                 <h1>Tổng Hợp Đề Ôn Thi</h1>
                 <div class="test-list">
-                    <!-- CẬP NHẬT: Test item 1 (Thêm số câu hỏi) -->
+                    <!-- Test item 1 -->
                     <div class="test-item">
                         <div class="test-info">
                             <h3>Đề kiểm tra 15 phút - Unit 1: My New School</h3>
@@ -1200,7 +1358,7 @@
                         </div>
                         <button class="btn" onclick="startQuiz('unit1')">Bắt đầu làm bài</button>
                     </div>
-                    <!-- CẬP NHẬT: Test item 2 (Thêm số câu hỏi) -->
+                    <!-- Test item 2 -->
                     <div class="test-item">
                         <div class="test-info">
                             <h3>Đề thi giữa kỳ 1</h3>
@@ -1208,7 +1366,7 @@
                         </div>
                         <button class="btn" onclick="startQuiz('midterm1')">Bắt đầu làm bài</button>
                     </div>
-                    <!-- CẬP NHẬT: Test item 3 (Thêm số câu hỏi) -->
+                    <!-- Test item 3 -->
                     <div class="test-item">
                         <div class="test-info">
                             <h3>Đề kiểm tra từ vựng - Unit 1 & 2</h3>
@@ -1216,7 +1374,7 @@
                         </div>
                         <button class="btn" onclick="startQuiz('vocab1-2')">Bắt đầu làm bài</button>
                     </div>
-                    <!-- MỚI: Test item 4 -->
+                    <!-- Test item 4 -->
                     <div class="test-item">
                         <div class="test-info">
                             <h3>Đề thi cuối kỳ 1</h3>
@@ -1224,7 +1382,7 @@
                         </div>
                         <button class="btn" onclick="startQuiz('finalterm1')">Bắt đầu làm bài</button>
                     </div>
-                    <!-- MỚI: Test item 5 -->
+                    <!-- Test item 5 -->
                     <div class="test-item">
                         <div class="test-info">
                             <h3>Đề thi giữa kỳ 2</h3>
@@ -1236,36 +1394,40 @@
             </div>
         </div> <!-- Kết thúc #page-tests -->
 
-        <!-- Trang 4: Game Ôn Tập (Mặc định ẩn) -->
+        <!-- Trang 4: Game Ôn Tập -->
         <div id="page-games" class="page">
             <div class="subpage-container">
                 <h1>Game Ôn Tập Thú Vị</h1>
                 <div class="game-grid">
                     <!-- Game card 1 -->
                     <div class="game-card">
-                        <img src="https://placehold.co/150x150/e0f7fa/000?text=Game+Icon+1" alt="Icon game">
-                        <h3>Lật thẻ từ vựng</h3>
-                        <button class="btn" onclick="startGame('flashcard')">Chơi ngay</button>
+                        <img src="https://placehold.co/300x150/e0f7fa/0284c7?text=Game+1" alt="Icon game Lật thẻ">
+                        <div class="game-card-text">
+                            <h3>Lật thẻ từ vựng</h3>
+                            <button class="btn" onclick="startGame('flashcard')">Chơi ngay</button>
+                        </div>
                     </div>
                     <!-- Game card 2 -->
                     <div class="game-card">
-                        <img src="https://placehold.co/150x150/e0f7fa/000?text=Game+Icon+2" alt="Icon game">
-                        <h3>Nối từ (Word Connect)</h3>
-                        <!-- CẬP NHẬT: Thay đổi onclick -->
-                        <button class="btn" onclick="startGame('wordconnect')">Chơi ngay</button>
+                        <img src="https://placehold.co/300x150/e0f7fa/0284c7?text=Game+2" alt="Icon game Nối từ">
+                        <div class="game-card-text">
+                            <h3>Nối từ (Word Connect)</h3>
+                            <button class="btn" onclick="startGame('wordconnect')">Chơi ngay</button>
+                        </div>
                     </div>
                     <!-- Game card 3 -->
                     <div class="game-card">
-                        <img src="https://placehold.co/150x150/e0f7fa/000?text=Game+Icon+3" alt="Icon game">
-                        <h3>Điền vào chỗ trống</h3>
-                        <!-- CẬP NHẬT: Thay đổi onclick -->
-                        <button class="btn" onclick="startGame('fillblank')">Chơi ngay</button>
+                        <img src="https://placehold.co/300x150/e0f7fa/0284c7?text=Game+3" alt="Icon game Điền từ">
+                        <div class="game-card-text">
+                            <h3>Điền vào chỗ trống</h3>
+                            <button class="btn" onclick="startGame('fillblank')">Chơi ngay</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div> <!-- Kết thúc #page-games -->
         
-        <!-- Trang 5: Làm Quiz (Mặc định ẩn) -->
+        <!-- Trang 5: Làm Quiz -->
         <div id="page-quiz" class="page">
             <div class="subpage-container">
                 <button class="btn btn-back" onclick="showPage('tests')">&larr; Quay lại danh sách đề</button>
@@ -1287,13 +1449,13 @@
             </div>
         </div> <!-- Kết thúc #page-quiz -->
 
-        <!-- Trang 6: Game Lật Thẻ (Mặc định ẩn) -->
+        <!-- Trang 6: Game Lật Thẻ -->
         <div id="page-game-flashcard" class="page">
             <div class="subpage-container">
                 <button class="btn btn-back" onclick="showPage('games')">&larr; Quay lại danh sách game</button>
                 <h1>Game: Lật thẻ từ vựng</h1>
                 <div class="flashcard-controls">
-                    <p>Số lần lật: <span id="flashcard-flips">0</span></p>
+                    <p>Số lần lật: <strong id="flashcard-flips" class="text-xl text-primary-DEFAULT">0</strong></p>
                     <button class="btn" onclick="initFlashcardGame()">Chơi lại</button>
                 </div>
                 <div id="flashcard-grid" class="flashcard-grid-container">
@@ -1302,21 +1464,19 @@
             </div>
         </div> <!-- Kết thúc #page-game-flashcard -->
         
-        <!-- MỚI: Trang 6.1: Game Nối Từ (Mặc định ẩn) -->
+        <!-- Trang 6.1: Game Nối Từ -->
         <div id="page-game-wordconnect" class="page">
             <div class="subpage-container">
                 <button class="btn btn-back" onclick="showPage('games')">&larr; Quay lại danh sách game</button>
                 <h1>Game: Nối từ</h1>
                 <p id="wc-level-info" style="text-align: center;">Level 1</p>
                 <div class="wc-game-area">
-                    <!-- Cột từ đã tìm thấy -->
                     <div id="wc-found-words">
                         <h3>Từ đã tìm thấy</h3>
                         <ul id="wc-found-list">
                             <!-- JS sẽ điền vào đây -->
                         </ul>
                     </div>
-                    <!-- Cột lưới chữ -->
                     <div class="wc-grid-container">
                         <div id="wc-grid">
                             <!-- JS sẽ tạo lưới chữ -->
@@ -1331,7 +1491,7 @@
             </div>
         </div> <!-- Kết thúc #page-game-wordconnect -->
 
-        <!-- MỚI: Trang 6.2: Game Điền vào chỗ trống (Mặc định ẩn) -->
+        <!-- Trang 6.2: Game Điền vào chỗ trống -->
         <div id="page-game-fillblank" class="page">
             <div class="subpage-container">
                 <button class="btn btn-back" onclick="showPage('games')">&larr; Quay lại danh sách game</button>
@@ -1358,7 +1518,7 @@
         </div> <!-- Kết thúc #page-game-fillblank -->
 
 
-        <!-- Trang 7: Đăng nhập (Mặc định ẩn) -->
+        <!-- Trang 7: Đăng nhập -->
         <div id="page-login" class="page">
             <div class="auth-form-container">
                 <form id="login-form">
@@ -1380,7 +1540,7 @@
             </div>
         </div> <!-- Kết thúc #page-login -->
 
-        <!-- Trang 8: Đăng ký (Mặc định ẩn) -->
+        <!-- Trang 8: Đăng ký -->
         <div id="page-register" class="page">
             <div class="auth-form-container">
                 <form id="register-form">
@@ -1406,83 +1566,94 @@
             </div>
         </div> <!-- Kết thúc #page-register -->
 
-        <!-- Trang 9: Cambridge (Mặc định ẩn) -->
+        <!-- Trang 9: Cambridge -->
         <div id="page-cambridge" class="page">
             <div class="subpage-container">
                 <h1>Chương trình Cambridge</h1>
-                <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;">
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="text-slate-600">
                     Nội dung học tập bám sát chương trình Cambridge Primary. Luyện tập từ vựng, ngữ pháp và các kỹ năng nghe, nói, đọc, viết theo từng Unit.
                 </p>
                 <div class="content-grid">
                     <!-- Unit Item 1 -->
                     <div class="content-item">
                         <img src="https://i.pinimg.com/736x/9f/73/2c/9f732c0a0cfd337c324c53d8ab917651.jpg" alt="Unit 1">
-                        <h3>Unit 1: Our School <span class="completion-icon" id="icon-cambridge-unit1"></span></h3>
-                        <p>Từ vựng về trường học, các môn học và hoạt động.</p>
-                        <button class="btn" onclick="showPage('cambridge-unit1', 'cambridge')">Vào học</button>
+                        <div class="content-item-text">
+                            <h3>Unit 1: Our School <span class="completion-icon" id="icon-cambridge-unit1"></span></h3>
+                            <p class="text-slate-500 text-sm">Từ vựng về trường học, các môn học và hoạt động.</p>
+                            <button class="btn" onclick="showPage('cambridge-unit1', 'cambridge')">Vào học</button>
+                        </div>
                     </div>
                     <!-- Unit Item 2 -->
                     <div class="content-item">
                         <img src="https://cdn.who.int/media/images/default-source/initiatives/uhc-advice/who-cards-08-healthy-world-01.tmb-1920v.jpg?sfvrsn=6fe14dc7_4" alt="Unit 2">
-                        <h3>Unit 2: Family and Friends <span class="completion-icon" id="icon-cambridge-unit2"></span></h3>
-                        <p>Từ vựng về gia đình, bạn bè và các mối quan hệ.</p>
-                        <button class="btn" onclick="showPage('cambridge-unit2', 'cambridge')">Vào học</button>
+                        <div class="content-item-text">
+                            <h3>Unit 2: Family and Friends <span class="completion-icon" id="icon-cambridge-unit2"></span></h3>
+                            <p class="text-slate-500 text-sm">Từ vựng về gia đình, bạn bè và các mối quan hệ.</p>
+                            <button class="btn" onclick="showPage('cambridge-unit2', 'cambridge')">Vào học</button>
+                        </div>
                     </div>
                     <!-- Unit Item 3 -->
                     <div class="content-item">
                         <img src="https://thumbs.dreamstime.com/b/earth-cartoon-hovering-over-mountain-valley-landscape-sunset-cartoon-earth-face-floats-above-valley-mountains-386459747.jpg" alt="Unit 3">
-                        <h3>Unit 3: The World Around Us <span class="completion-icon" id="icon-cambridge-unit3"></span></h3>
-                        <p>Khám phá thế giới tự nhiên, động vật và môi trường.</p>
-                        <button class="btn" onclick="showPage('cambridge-unit3', 'cambridge')">Vào học</button>
+                        <div class="content-item-text">
+                            <h3>Unit 3: The World Around Us <span class="completion-icon" id="icon-cambridge-unit3"></span></h3>
+                            <p class="text-slate-500 text-sm">Khám phá thế giới tự nhiên, động vật và môi trường.</p>
+                            <button class="btn" onclick="showPage('cambridge-unit3', 'cambridge')">Vào học</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div> <!-- Kết thúc #page-cambridge -->
 
-        <!-- Trang 10: Global Success (Mặc định ẩn) -->
+        <!-- Trang 10: Global Success -->
         <div id="page-globalsuccess" class="page">
             <div class="subpage-container">
                 <h1>Chương trình Global Success (Lớp 5)</h1>
-                <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;">
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="text-slate-600">
                     Tổng hợp từ vựng và ngữ pháp theo Sách giáo khoa Tiếng Anh 5 - Global Success. Luyện tập theo từng đơn vị bài học.
                 </p>
                 <div class="content-grid">
                     <!-- Unit Item 1 -->
                     <div class="content-item">
-                        <img src="https://placehold.co/250x150/e0f7fa/000?text=Unit+1:+Address" alt="Unit 1">
-                        <h3>Unit 1: What's your address? <span class="completion-icon" id="icon-globalsuccess-unit1"></span></h3>
-                        <p>Học cách hỏi và trả lời về địa chỉ.</p>
-                        <button class="btn" onclick="showPage('globalsuccess-unit1', 'globalsuccess')">Vào học</button>
+                        <img src="https://placehold.co/300x150/e0f7fa/0284c7?text=Unit+1" alt="Unit 1">
+                        <div class="content-item-text">
+                            <h3>Unit 1: What's your address? <span class="completion-icon" id="icon-globalsuccess-unit1"></span></h3>
+                            <p class="text-slate-500 text-sm">Học cách hỏi và trả lời về địa chỉ.</p>
+                            <button class="btn" onclick="showPage('globalsuccess-unit1', 'globalsuccess')">Vào học</button>
+                        </div>
                     </div>
                     <!-- Unit Item 2 -->
                     <div class="content-item">
-                        <img src="https://placehold.co/250x150/e0f7fa/000?text=Unit+2:+Daily+Routines" alt="Unit 2">
-                        <h3>Unit 2: I always get up early <span class="completion-icon" id="icon-globalsuccess-unit2"></span></h3>
-                        <p>Nói về các thói quen và hoạt động hàng ngày.</p>
-                        <button class="btn" onclick="showPage('globalsuccess-unit2', 'globalsuccess')">Vào học</button>
+                        <img src="https://placehold.co/300x150/e0f7fa/0284c7?text=Unit+2" alt="Unit 2">
+                         <div class="content-item-text">
+                            <h3>Unit 2: I always get up early <span class="completion-icon" id="icon-globalsuccess-unit2"></span></h3>
+                            <p class="text-slate-500 text-sm">Nói về các thói quen và hoạt động hàng ngày.</p>
+                            <button class="btn" onclick="showPage('globalsuccess-unit2', 'globalsuccess')">Vào học</button>
+                        </div>
                     </div>
                     <!-- Unit Item 3 -->
                     <div class="content-item">
-                        <img src="https://placehold.co/250x150/e0f7fa/000?text=Unit+3:+Holiday" alt="Unit 3">
-                        <h3>Unit 3: Where did you go on holiday? <span class="completion-icon" id="icon-globalsuccess-unit3"></span></h3>
-                        <p>Học cách nói về các kỳ nghỉ (Thì quá khứ đơn).</p>
-                        <button class="btn" onclick="showPage('globalsuccess-unit3', 'globalsuccess')">Vào học</button>
+                        <img src="https://placehold.co/300x150/e0f7fa/0284c7?text=Unit+3" alt="Unit 3">
+                        <div class="content-item-text">
+                            <h3>Unit 3: Where did you go on holiday? <span class="completion-icon" id="icon-globalsuccess-unit3"></span></h3>
+                            <p class="text-slate-500 text-sm">Học cách nói về các kỳ nghỉ (Thì quá khứ đơn).</p>
+                            <button class="btn" onclick="showPage('globalsuccess-unit3', 'globalsuccess')">Vào học</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div> <!-- Kết thúc #page-globalsuccess -->
 
-        <!-- Trang 11: Hồ sơ (Mặc định ẩn) -->
+        <!-- Trang 11: Hồ sơ -->
         <div id="page-profile" class="page">
             <div class="subpage-container">
                 <h1>Hồ sơ của bạn</h1>
                 <div class="lesson-section">
                     <h2>Thông tin tài khoản</h2>
-                    <p>Email: <strong id="profile-email">...</strong></p>
-                    <p>UserID: <strong id="profile-userid">...</strong></p>
+                    <p>Email: <strong id="profile-email" class="text-primary-DEFAULT">...</strong></p>
+                    <p>UserID: <strong id="profile-userid" class="text-slate-500 text-sm">...</strong></p>
                 </div>
                 
-                <!-- HIỂN THỊ KẾT QUẢ QUIZ -->
                 <div class="lesson-section">
                     <h2>Tiến độ học tập (Bài kiểm tra)</h2>
                     <div id="profile-quiz-results">
@@ -1490,34 +1661,31 @@
                     </div>
                 </div>
                 
-                <!-- MỚI: HIỂN THỊ TIẾN ĐỘ BÀI HỌC -->
                 <div class="lesson-section">
                     <h2>Tiến độ bài học (Đã hoàn thành)</h2>
                     <div id="profile-lesson-progress">
                         <p>Chưa hoàn thành bài học nào.</p>
                     </div>
                 </div>
-                <!-- KẾT THÚC TÍNH NĂNG MỚI -->
 
                 <button class="btn btn-back" id="profile-logout-btn" onclick="handleLogout(event)">Đăng xuất</button>
             </div>
         </div> <!-- Kết thúc #page-profile -->
         
-        <!-- MỚI: Trang 12: Bảng Xếp Hạng -->
+        <!-- Trang 12: Bảng Xếp Hạng -->
         <div id="page-leaderboard" class="page">
             <div class="subpage-container">
                 <h1>Bảng Xếp Hạng</h1>
-                <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;">
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 30px;" class="text-slate-600">
                     Thành tích của các học sinh có điểm cao nhất. Điểm được tính từ các bài kiểm tra (Quiz) và game (Điền vào chỗ trống).
                 </p>
                 <div id="leaderboard-table-container">
-                    <!-- Bảng xếp hạng sẽ được tạo bởi JS -->
                     <p id="leaderboard-loading">Đang tải bảng xếp hạng...</p>
                 </div>
             </div>
         </div> <!-- Kết thúc #page-leaderboard -->
 
-        <!-- TRANG BÀI HỌC (CẬP NHẬT VỚI TÍNH NĂNG MỚI) -->
+        <!-- TRANG BÀI HỌC -->
 
         <!-- Cambridge Unit 1 -->
         <div id="page-cambridge-unit1" class="page">
@@ -1525,7 +1693,6 @@
                 <button class="btn btn-back" onclick="showPage('cambridge', 'cambridge')">&larr; Quay lại Cambridge</button>
                 <h1>Cambridge - Unit 1: Our School</h1>
                 
-                <!-- Nội dung bài học -->
                 <div class="lesson-section">
                     <h2>1. Từ vựng (Vocabulary)</h2>
                     <ul>
@@ -1542,10 +1709,8 @@
                     <p>Ví dụ: I have Maths, Vietnamese, and English.</p>
                 </div>
                 
-                <!-- MỚI: Nút hoàn thành -->
                 <button class="btn btn-complete" onclick="markLessonComplete('cambridge-unit1')">Hoàn thành bài học</button>
 
-                <!-- MỚI: Khu vực bình luận -->
                 <div class="lesson-section comment-section">
                     <h2>Bình luận</h2>
                     <div id="comment-list-cambridge-unit1" class="comment-list">
@@ -1566,10 +1731,8 @@
                 <h1>Cambridge - Unit 2: Family and Friends</h1>
                 <div class="lesson-section"><h2>Nội dung Unit 2...</h2></div>
                 
-                <!-- MỚI: Nút hoàn thành -->
                 <button class="btn btn-complete" onclick="markLessonComplete('cambridge-unit2')">Hoàn thành bài học</button>
 
-                <!-- MỚI: Khu vực bình luận -->
                 <div class="lesson-section comment-section">
                     <h2>Bình luận</h2>
                     <div id="comment-list-cambridge-unit2" class="comment-list"></div>
@@ -1673,21 +1836,20 @@
 
     <!-- PHẦN 3: FOOTER CHUNG -->
     <footer class="footer">
-        <p>© 2025 English With Me. All rights reserved.Made by NBP</p>
+        <p>© 2025 English With Me. All rights reserved. Made by NBP</p>
     </footer>
 
     <!-- Video Modal Structure -->
     <div id="video-modal" class="modal-overlay" style="display: none;" onclick="closeVideoModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <span class="modal-close" onclick="closeVideoModal()">&times;</span>
-            <h3 id="modal-video-title">Video Title</h3>
+            <h3 id="modal-video-title" class="text-xl font-bold mb-4">Video Title</h3>
             <div class="video-player-container">
-                <!-- CẬP NHẬT: Thay thế <img> bằng <iframe> -->
                 <iframe id="modal-video-iframe" width="560" height="315" src="" 
                 frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen></iframe>
             </div>
-            <!-- MỚI: Thêm nội dung cho Custom Alert -->
+            <!-- Custom Alert Content -->
             <div id="modal-alert-content" style="display: none; text-align: center; padding: 30px 0;">
                 <p id="modal-alert-text" style="font-size: 1.2em;"></p>
                 <button class="btn" onclick="closeVideoModal()" style="margin-top: 20px;">Đã hiểu</button>
@@ -1711,34 +1873,26 @@
         import { 
             getFirestore, 
             setLogLevel,
-            // CẬP NHẬT: Thêm các hàm Firestore
             doc,
             setDoc,
-            getDoc, // MỚI: Để kiểm tra tiến độ
+            getDoc,
             collection,
             getDocs,
-            addDoc, // MỚI: Cho bình luận
-            query, // MỚI: Cho bình luận
-            where, // MỚI: Cho bình luận
-            onSnapshot, // MỚI: Cho bình luận real-time
-            // MỚI: Thêm increment cho bảng xếp hạng
+            addDoc,
+            query,
+            where,
+            onSnapshot,
             increment 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- 0. KHAI BÁO BIẾN TOÀN CỤC CHO APP ---
         
-        // Biến Firebase
         let app, auth, db;
         let currentUser = null;
-
-        // --- !!! QUAN TRỌNG KHI TRIỂN KHAI LÊN GITHUB PAGES !!! ---
-        // Bạn cần thay thế các giá trị dưới đây bằng thông tin từ dự án Firebase của bạn.
         
-        // 1. (Tùy chọn) Đặt một ID cho ứng dụng của bạn, ví dụ: 'my-english-app'
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'my-english-app-github';
 
-        // 2. (BẮT BUỘC) Dán đối tượng cấu hình Firebase của bạn vào đây.
-        // Lấy nó từ Cài đặt dự án (Project Settings) > Ứng dụng của bạn (Your apps) > Web app.
+        // (BẮT BUỘC) Dán đối tượng cấu hình Firebase của bạn vào đây.
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
             : {
@@ -1751,34 +1905,24 @@
   measurementId: "G-GVP2MCQNLJ"
             };
 
-        // 3. (Không cần thay đổi) Biến token này sẽ là null trên GitHub Pages,
-        // ứng dụng sẽ tự động sử dụng đăng nhập ẩn danh (signInAnonymously).
         const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // Thêm kiểm tra nếu firebaseConfig vẫn còn trống
         if (!firebaseConfig.apiKey) {
             console.error("LỖI: firebaseConfig chưa được thiết lập!");
-            // Hiển thị thông báo lỗi cho người dùng cuối
             document.body.innerHTML = `<div style="padding: 40px; text-align: center; font-family: sans-serif; font-size: 1.2em; color: red;">
                 <h1>Lỗi Cấu Hình</h1>
                 <p>Trang web chưa được cấu hình Firebase. Vui lòng liên hệ quản trị viên.</p>
                 <p>(Nếu bạn là quản trị viên, vui lòng dán 'firebaseConfig' vào tệp HTML.)</p>
             </div>`;
-            // Ngăn không cho code tiếp tục chạy
             throw new Error("Firebase config is missing.");
         }
         
-        // --- Kết thúc phần cấu hình cho GitHub Pages ---
-
-
         // Biến trạng thái App
         let currentPage = 'home';
-        // MỚI: Biến lưu các hàm unsub của listener bình luận
         let lessonUnsubscribers = {};
         
         // Biến Video Modal & Alert
         let videoModal, modalVideoTitle, modalVideoIframe;
-        // MỚI: Thêm biến cho alert modal
         let modalAlertContent, modalAlertText;
         
         // Biến Quiz
@@ -1801,25 +1945,25 @@
         let flipCount = 0;
         let matchedPairs = 0;
         
-        // MỚI: Biến Game Word Connect
+        // Biến Game Word Connect
         let wcGridEl, wcFoundWordsEl, wcCurrentWordEl, wcShuffleBtn, wcNextLevelBtn, wcLevelInfoEl, wcFoundListEl;
         let wcCurrentLevel = 0;
         let wcIsDrawing = false;
-        let wcCurrentPath = []; // Mảng các {el, letter, index}
+        let wcCurrentPath = [];
         let wcFoundInLevel = [];
-        let wcGridLetters = []; // Mảng 1D của các chữ cái trên lưới
+        let wcGridLetters = [];
         const wcGameData = [
             {
-                grid: ['C', 'A', 'T', 'O', 'G', 'D', 'N', 'P', 'E'], // 3x3
+                grid: ['C', 'A', 'T', 'O', 'G', 'D', 'N', 'P', 'E'],
                 words: ['CAT', 'DOG', 'PEN', 'GET', 'TEN', 'GOT', 'DOT', 'ON', 'AT', 'TO', 'GO', 'DO', 'NO', 'EAT', 'TEA', 'PET', 'APE', 'AGE', 'ONE', 'TOP', 'POT', 'COP', 'COG']
             },
             {
-                grid: ['B', 'E', 'D', 'R', 'O', 'M', 'O', 'A', 'K'], // 3x3
+                grid: ['B', 'E', 'D', 'R', 'O', 'M', 'O', 'A', 'K'],
                 words: ['BED', 'ROOM', 'BEDROOM', 'BOOK', 'ROBE', 'MORE', 'DOOR', 'DREAM', 'ODE', 'BAD', 'BEAM', 'BROOM', 'BORE', 'MODE']
             }
         ];
 
-        // MỚI: Biến Game Fill Blank
+        // Biến Game Fill Blank
         let fbSentenceStartEl, fbSentenceEndEl, fbInputEl, fbCheckBtn, fbFeedbackEl, fbProgressEl, fbGameAreaEl, fbResultsEl, fbRestartBtn, fbResultsScoreEl;
         let fbCurrentQuestion = 0;
         let fbScore = 0;
@@ -1835,33 +1979,29 @@
         let loginLink, registerLink, profileLink, logoutLink;
         let profileEmailEl, profileUserIdEl, profileLogoutBtn;
         let profileQuizResultsEl;
-        // MỚI: Biến cho tiến độ bài học trên profile
         let profileLessonProgressEl;
 
-        // MỚI: Biến cho tính năng AI
+        // Biến cho tính năng AI
         let wordLoadingEl, wordDisplayEl, wordImageEl, wordTermEl, wordDefinitionEl, wordExampleEl, wordErrorEl, newWordBtn;
         const apiKey = ""; // Sẽ được cung cấp lúc chạy
-        let isFetchingWord = false; // Ngăn chặn việc nhấn nút nhiều lần
+        let isFetchingWord = false;
         
-        // MỚI: Biến cho Bảng xếp hạng
+        // Biến cho Bảng xếp hạng
         let leaderboardContainerEl, leaderboardLoadingEl;
 
 
         // --- 1. HỆ THỐNG CHUYỂN TRANG (Global) ---
         window.showPage = (pageId, activeNavId = null) => {
-            // 1. Ẩn tất cả các .page
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
 
-            // 2. Hiển thị trang mục tiêu
             const targetPage = document.getElementById('page-' + pageId);
             if (targetPage) {
                 targetPage.classList.add('active');
                 currentPage = pageId;
             }
 
-            // 3. Cập nhật trạng thái 'active' trên navbar
             document.querySelectorAll('.navbar a').forEach(link => {
                 link.classList.remove('active-nav');
                 const linkPage = link.getAttribute('data-page');
@@ -1870,60 +2010,49 @@
                 }
             });
 
-            // 4. (MỚI) Dọn dẹp listeners bình luận cũ
-            // Hủy đăng ký tất cả các listeners bình luận cũ để tránh rò rỉ bộ nhớ
             Object.values(lessonUnsubscribers).forEach(unsub => unsub());
             lessonUnsubscribers = {};
 
-            // 5. (MỚI) Tải dữ liệu động cho các trang bài học
             if (pageId.startsWith('cambridge-unit') || pageId.startsWith('globalsuccess-unit')) {
                 const lessonId = pageId;
-                checkLessonCompletion(lessonId); // Cập nhật nút "Hoàn thành"
-                loadComments(lessonId); // Tải và lắng nghe bình luận
+                checkLessonCompletion(lessonId);
+                loadComments(lessonId);
             }
 
-            // 6. (MỚI) Tải dữ liệu động cho các trang tổng quan (course pages)
             if (pageId === 'cambridge' || pageId === 'globalsuccess') {
                 loadAllLessonCompletions(pageId);
             }
             
-            // 7. (CẬP NHẬT) Tải dữ liệu khi vào trang hồ sơ
             if (pageId === 'profile') {
-                loadProfileData(); // Tải email, uid, kết quả quiz VÀ TIẾN ĐỘ BÀI HỌC
+                loadProfileData();
             }
             
-            // 8. (MỚI) Tải dữ liệu bảng xếp hạng
             if (pageId === 'leaderboard') {
                 loadLeaderboard();
             }
 
-            // 9. Cuộn lên đầu trang
             window.scrollTo(0, 0);
         }
 
         // --- 2. TÍNH NĂNG VIDEO MODAL & CUSTOM ALERT (Global) ---
         
-        // MỚI: Hàm alert tùy chỉnh, tái sử dụng modal
         window.showCustomAlert = (message) => {
             modalVideoTitle.textContent = 'Thông báo';
-            modalVideoIframe.style.display = 'none'; // Ẩn video
-            modalAlertContent.style.display = 'block'; // Hiện nội dung alert
+            modalVideoIframe.style.display = 'none';
+            modalAlertContent.style.display = 'block';
             modalAlertText.textContent = message;
             videoModal.style.display = 'flex';
         }
         
         window.openVideoModal = (title, youtubeId) => {
             modalVideoTitle.textContent = title;
-            modalVideoIframe.style.display = 'block'; // Hiện video
-            modalAlertContent.style.display = 'none'; // Ẩn nội dung alert
-            
-            // Thêm ?autoplay=1 để video tự động chạy
+            modalVideoIframe.style.display = 'block';
+            modalAlertContent.style.display = 'none';
             modalVideoIframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
             videoModal.style.display = 'flex';
         }
 
         window.closeVideoModal = () => {
-            // Đặt src về rỗng để DỪNG video phát trong nền
             modalVideoIframe.src = '';
             videoModal.style.display = 'none';
         }
@@ -1982,13 +2111,8 @@
             }
             
             try {
-                // Đăng ký user
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await createUserWithEmailAndPassword(auth, email, password);
                 
-                // (Tùy chọn) Lưu thông tin user (ví dụ: email) vào 1 doc riêng
-                // const userDocRef = doc(db, "users", userCredential.user.uid);
-                // await setDoc(userDocRef, { email: email, createdAt: new Date() });
-
                 messageEl.textContent = 'Đăng ký thành công! Đang chuyển về trang chủ...';
                 messageEl.className = 'auth-message success';
                 messageEl.style.display = 'block';
@@ -1999,8 +2123,7 @@
                     event.target.reset();
                 }, 1500);
 
-            } catch (error)
-{
+            } catch (error) {
                 let errorMsg = 'Lỗi đăng ký. Vui lòng thử lại.';
                 if (error.code === 'auth/email-already-in-use') {
                     errorMsg = 'Email này đã được sử dụng.';
@@ -2017,7 +2140,7 @@
         }
         
         window.handleLogout = async (event) => {
-            if (event) event.preventDefault(); // Cho phép gọi từ profileLogoutBtn
+            if (event) event.preventDefault();
             try {
                 await signOut(auth);
                 window.showPage('home');
@@ -2028,7 +2151,6 @@
 
         // --- 4. TÍNH NĂNG QUIZ (Global) ---
         
-        // CẬP NHẬT: Mở rộng đối tượng quizzes
         const quizzes = {
             'unit1': {
                 title: 'Đề kiểm tra 15 phút - Unit 1',
@@ -2080,7 +2202,6 @@
                     { q: 'Từ nào có nghĩa là "bạn bè"?', options: ['Family', 'Parents', 'Friends', 'Brother'], answer: 2 }
                 ]
             },
-            // MỚI: Đề thi cuối kỳ 1
             'finalterm1': {
                 title: 'Đề thi cuối kỳ 1',
                 questions: [
@@ -2106,7 +2227,6 @@
                     { q: 'What would you like to drink? - I\'d like ___ water.', options: ['a', 'an', 'some', 'any'], answer: 2 }
                 ]
             },
-            // MỚI: Đề thi giữa kỳ 2
             'midterm2': {
                 title: 'Đề thi giữa kỳ 2',
                 questions: [
@@ -2173,14 +2293,12 @@
         }
 
         window.nextQuestion = () => {
-            // Kiểm tra câu trả lời
             const question = currentQuiz.questions[currentQuestionIndex];
             const correct = (selectedAnswerIndex === question.answer);
             if (correct) {
                 score++;
             }
             
-            // Chuyển câu hỏi tiếp theo
             currentQuestionIndex++;
             if (currentQuestionIndex < currentQuiz.questions.length) {
                 renderQuestion();
@@ -2198,17 +2316,13 @@
             const resultText = `Bạn đã trả lời đúng ${score} / ${currentQuiz.questions.length} câu!`;
             quizScoreEl.textContent = resultText;
             
-            // Gọi hàm lưu kết quả vào Firestore (private)
             saveQuizResult(currentQuiz.id, score, currentQuiz.questions.length, currentQuiz.title);
             
-            // MỚI: Cập nhật điểm lên bảng xếp hạng (public)
-            // Chỉ cộng điểm nếu user làm đúng > 0 câu
             if (score > 0) {
                 updateUserScore(score); 
             }
         }
 
-        // Hàm lưu kết quả quiz vào Firestore (Private - cho trang Profile)
         async function saveQuizResult(quizId, score, total, title) {
             if (!currentUser) {
                 console.log("Không thể lưu kết quả (người dùng chưa đăng nhập).");
@@ -2216,15 +2330,13 @@
             }
             
             try {
-                // Sử dụng đường dẫn private: /artifacts/{appId}/users/{userId}/quizResults/{quizId}
-                // Dùng quizId làm ID của doc để dễ dàng ghi đè
                 const docRef = doc(db, "artifacts", appId, "users", currentUser.uid, "quizResults", quizId);
                 const data = {
                     quizId: quizId,
                     title: title,
                     score: score,
                     total: total,
-                    timestamp: new Date() // Lưu lại thời gian làm bài
+                    timestamp: new Date()
                 };
                 await setDoc(docRef, data); 
                 console.log("Đã lưu kết quả quiz (private):", quizId);
@@ -2233,15 +2345,12 @@
             }
         }
 
-        // (CẬP NHẬT) Hàm tải dữ liệu cho trang hồ sơ (bao gồm cả tiến độ bài học)
         async function loadProfileData() {
-            // 1. Cập nhật thông tin cơ bản
             if (currentUser) {
                 profileEmailEl.textContent = currentUser.email || 'Không có (Tài khoản ẩn danh)';
                 profileUserIdEl.textContent = currentUser.uid;
             }
 
-            // 2. Tải kết quả quiz
             profileQuizResultsEl.innerHTML = '<p>Đang tải kết quả...</p>';
 
             if (!currentUser) {
@@ -2250,7 +2359,6 @@
                 return;
             }
 
-            // Tải Quiz
             try {
                 const collRef = collection(db, "artifacts", appId, "users", currentUser.uid, "quizResults");
                 const querySnapshot = await getDocs(collRef);
@@ -2277,11 +2385,9 @@
                 profileQuizResultsEl.innerHTML = '<p style="color: red;">Lỗi khi tải kết quả quiz.</p>';
             }
             
-            // 3. (MỚI) Tải tiến độ bài học
             await loadProfileLessonProgress();
         }
         
-        // (MỚI) Hàm tải tiến độ bài học cho trang profile
         async function loadProfileLessonProgress() {
             const el = profileLessonProgressEl;
             el.innerHTML = '<p>Đang tải tiến độ...</p>';
@@ -2303,7 +2409,7 @@
                 let html = '<ul style="list-style-type: none; padding-left: 0;">';
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const lessonId = doc.id; // Lấy ID của doc (vd: 'cambridge-unit1')
+                    const lessonId = doc.id;
                     const timestamp = data.timestamp?.seconds ? new Date(data.timestamp.seconds * 1000) : new Date();
                     html += `<li style="padding: 10px; border-bottom: 1px solid #eee;">
                         <strong>${lessonId}</strong>
@@ -2328,13 +2434,11 @@
             }
         }
 
-        // CẬP NHẬT: Hàm startGame chung
         window.startGame = (gameId) => {
             if (gameId === 'flashcard') {
                 window.showPage('game-flashcard', 'games');
                 initFlashcardGame();
             }
-            // MỚI: Thêm 2 game mới
             if (gameId === 'wordconnect') {
                 window.showPage('game-wordconnect', 'games');
                 initWordConnectGame();
@@ -2355,7 +2459,7 @@
             matchedPairs = 0;
             flipsEl.textContent = '0';
             
-            let gameCards = [...cardData]; // Tạo bản sao để shuffle
+            let gameCards = [...cardData];
             shuffleArray(gameCards);
             
             gameCards.forEach(item => {
@@ -2402,7 +2506,6 @@
             matchedPairs++;
             if (matchedPairs === cardData.length / 2) {
                 setTimeout(() => {
-                    // Sử dụng modal tùy chỉnh
                     showCustomAlert(`Hoàn thành sau ${flipCount} lần lật!`);
                 }, 500);
             }
@@ -2421,7 +2524,7 @@
             [flippedCards, lockBoard] = [[], false];
         }
         
-        // --- 5.2 (MỚI) TÍNH NĂNG GAME WORD CONNECT ---
+        // --- 5.2 TÍNH NĂNG GAME WORD CONNECT ---
         
         function initWordConnectGame(level = 0) {
             wcCurrentLevel = level;
@@ -2449,11 +2552,10 @@
             wcCurrentWordEl.textContent = '';
             wcFoundInLevel = [];
             
-            // Grid size (ví dụ: 9 chữ = 3x3, 16 chữ = 4x4)
             const gridSize = Math.sqrt(level.grid.length);
             wcGridEl.style.gridTemplateColumns = `repeat(${gridSize}, 80px)`;
             
-            wcGridLetters = [...level.grid]; // Lưu lại thứ tự chữ
+            wcGridLetters = [...level.grid];
             
             wcGridLetters.forEach((letter, index) => {
                 const letterEl = document.createElement('div');
@@ -2490,7 +2592,6 @@
             );
             
             if (el && el.classList.contains('wc-letter') && !el.classList.contains('selected')) {
-                // TODO: Kiểm tra xem có phải là ô liền kề không (bỏ qua để đơn giản)
                 wcCurrentPath.push({
                     el: el,
                     letter: el.dataset.letter,
@@ -2516,7 +2617,6 @@
         function resetWCPath() {
             wcCurrentPath.forEach(item => item.el.classList.remove('selected'));
             wcCurrentPath = [];
-            // Cập nhật từ
             setTimeout(() => {
                 wcCurrentWordEl.textContent = '';
             }, 200);
@@ -2528,15 +2628,12 @@
             
             if (word.length < 2) return;
             
-            // Kiểm tra xem từ có hợp lệ VÀ chưa tìm thấy
             if (levelWords.includes(word) && !wcFoundInLevel.includes(word)) {
                 wcFoundInLevel.push(word);
-                // Hiển thị từ đã tìm thấy
                 const li = document.createElement('li');
                 li.textContent = word;
                 wcFoundListEl.appendChild(li);
                 
-                // Kiểm tra hoàn thành level
                 if (wcFoundInLevel.length === levelWords.length) {
                     showCustomAlert("Chúc mừng! Bạn đã hoàn thành level!");
                     wcNextLevelBtn.style.display = 'block';
@@ -2545,9 +2642,7 @@
         }
         
         function shuffleWCGrid() {
-            // Trộn mảng wcGridLetters
             shuffleArray(wcGridLetters);
-            // Cập nhật lại các ô
             const letters = wcGridEl.querySelectorAll('.wc-letter');
             letters.forEach((el, index) => {
                 const newLetter = wcGridLetters[index];
@@ -2556,7 +2651,7 @@
             });
         }
         
-        // --- 5.3 (MỚI) TÍNH NĂNG GAME FILL BLANK ---
+        // --- 5.3 TÍNH NĂNG GAME FILL BLANK ---
         
         function initFillBlankGame() {
             fbCurrentQuestion = 0;
@@ -2564,7 +2659,7 @@
             fbGameAreaEl.style.display = 'block';
             fbResultsEl.style.display = 'none';
             fbCheckBtn.textContent = 'Kiểm tra';
-            fbCheckBtn.onclick = checkFillBlankAnswer; // Gán lại sự kiện kiểm tra
+            fbCheckBtn.onclick = checkFillBlankAnswer;
             loadFillBlankQuestion(fbCurrentQuestion);
         }
         
@@ -2601,11 +2696,10 @@
             fbInputEl.disabled = true;
             fbCheckBtn.disabled = true;
             
-            // Chuyển sang câu tiếp theo
             setTimeout(() => {
                 fbCurrentQuestion++;
                 loadFillBlankQuestion(fbCurrentQuestion);
-            }, 2000); // Chờ 2 giây
+            }, 2000);
         }
         
         function showFillBlankResults() {
@@ -2613,15 +2707,13 @@
             fbResultsEl.style.display = 'block';
             fbResultsScoreEl.textContent = `Bạn đúng ${fbScore} / ${fbGameData.length} câu.`;
             
-            // MỚI: Cập nhật điểm lên bảng xếp hạng (public)
             if (fbScore > 0) {
                 updateUserScore(fbScore);
             }
         }
 
-        // --- 6. (MỚI) TÍNH NĂNG TIẾN ĐỘ BÀI HỌC ---
+        // --- 6. TÍNH NĂNG TIẾN ĐỘ BÀI HỌC ---
         
-        // Đánh dấu hoàn thành
         window.markLessonComplete = async (lessonId) => {
             if (!currentUser) {
                 showCustomAlert("Bạn cần đăng nhập để lưu tiến độ!");
@@ -2629,22 +2721,20 @@
             }
             
             const buttonEl = document.querySelector(`#page-${lessonId} .btn-complete`);
-            if (buttonEl.classList.contains('completed')) return; // Đã hoàn thành
+            if (buttonEl.classList.contains('completed')) return;
 
-            // Đường dẫn private: /artifacts/{appId}/users/{userId}/lessonProgress/{lessonId}
             const docRef = doc(db, "artifacts", appId, "users", currentUser.uid, "lessonProgress", lessonId);
             
             try {
                 await setDoc(docRef, {
                     completed: true,
                     timestamp: new Date(),
-                    lessonId: lessonId // Lưu lại ID để dễ truy vấn ở profile
+                    lessonId: lessonId
                 });
                 buttonEl.textContent = 'Đã hoàn thành';
                 buttonEl.classList.add('completed');
                 buttonEl.disabled = true;
                 
-                // Cập nhật icon ở trang course
                 const iconEl = document.getElementById(`icon-${lessonId}`);
                 if (iconEl) {
                     iconEl.textContent = '✓';
@@ -2655,17 +2745,15 @@
             }
         }
         
-        // Kiểm tra trạng thái hoàn thành khi tải trang
         async function checkLessonCompletion(lessonId) {
             const buttonEl = document.querySelector(`#page-${lessonId} .btn-complete`);
             if (!buttonEl) return;
             
-            // Reset trạng thái nút
             buttonEl.textContent = 'Hoàn thành bài học';
             buttonEl.classList.remove('completed');
             buttonEl.disabled = false;
 
-            if (!currentUser) return; // Chưa đăng nhập, không cần kiểm tra
+            if (!currentUser) return;
             
             const docRef = doc(db, "artifacts", appId, "users", currentUser.uid, "lessonProgress", lessonId);
             
@@ -2681,27 +2769,23 @@
             }
         }
         
-        // Tải tất cả trạng thái hoàn thành cho trang tổng quan (Cambridge, Global Success)
         async function loadAllLessonCompletions(courseType) {
-            // Xóa các icon cũ
             document.querySelectorAll(`#page-${courseType} .completion-icon`).forEach(icon => {
                 icon.textContent = '';
             });
 
-            if (!currentUser) return; // Không hiển thị check nếu chưa đăng nhập
+            if (!currentUser) return;
 
-            // Lấy tất cả doc từ collection 'lessonProgress'
             const collRef = collection(db, "artifacts", appId, "users", currentUser.uid, "lessonProgress");
             const q = query(collRef, where("completed", "==", true));
             
             try {
                 const querySnapshot = await getDocs(q);
                 querySnapshot.forEach((doc) => {
-                    const lessonId = doc.id; // ID là 'cambridge-unit1', v.v.
-                    // Chỉ cập nhật icon nếu nó tồn tại trên trang hiện tại
+                    const lessonId = doc.id;
                     const iconEl = document.getElementById(`icon-${lessonId}`);
                     if (iconEl) {
-                        iconEl.textContent = '✓'; // Thêm dấu check
+                        iconEl.textContent = '✓';
                     }
                 });
             } catch (error) {
@@ -2709,20 +2793,15 @@
             }
         }
 
-        // --- 7. (MỚI) TÍNH NĂNG BÌNH LUẬN ---
+        // --- 7. TÍNH NĂNG BÌNH LUẬN ---
 
-        // Tải và lắng nghe bình luận (real-time)
         async function loadComments(lessonId) {
             const commentListEl = document.getElementById(`comment-list-${lessonId}`);
             if (!commentListEl) return;
 
             commentListEl.innerHTML = "<p>Đang tải bình luận...</p>";
             
-            // Đường dẫn public: /artifacts/{appId}/public/data/lessonComments
             const collRef = collection(db, "artifacts", appId, "public", "data", "lessonComments");
-            
-            // Tạo query để lọc theo lessonId
-            // KHÔNG DÙNG orderBy vì có thể yêu cầu index
             const q = query(collRef, where("lessonId", "==", lessonId));
             
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -2736,15 +2815,13 @@
                     comments.push(doc.data());
                 });
                 
-                // Sắp xếp thủ công trong JS (vì orderBy có thể gây lỗi index)
                 comments.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
-                commentListEl.innerHTML = ''; // Xóa nội dung "Đang tải..."
+                commentListEl.innerHTML = '';
                 comments.forEach(comment => {
                     renderComment(lessonId, comment);
                 });
                 
-                // Tự động cuộn xuống cuối
                 commentListEl.scrollTop = commentListEl.scrollHeight;
 
             }, (error) => {
@@ -2752,11 +2829,9 @@
                 commentListEl.innerHTML = "<p style='color:red;'>Không thể tải bình luận.</p>";
             });
 
-            // Lưu lại hàm unsub để dọn dẹp khi chuyển trang
             lessonUnsubscribers[lessonId] = unsubscribe;
         }
 
-        // Hiển thị 1 bình luận
         function renderComment(lessonId, data) {
             const commentListEl = document.getElementById(`comment-list-${lessonId}`);
             if (!commentListEl) return;
@@ -2765,10 +2840,8 @@
             item.className = 'comment-item';
             
             const timestamp = data.timestamp?.seconds ? new Date(data.timestamp.seconds * 1000) : new Date();
-            // Lấy tên user (phần trước @) từ email, hoặc 6 ký tự đầu của UID, hoặc 'ẩn danh'
             const emailName = data.email ? data.email.split('@')[0] : (data.userId ? data.userId.substring(0, 6) : 'Anonymous');
             
-            // XSS mitigation (đơn giản): thay thế < >
             const safeText = data.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
             
             item.innerHTML = `
@@ -2779,50 +2852,44 @@
             commentListEl.appendChild(item);
         }
 
-        // Gửi bình luận
         window.postComment = async (lessonId) => {
             const inputEl = document.getElementById(`comment-input-${lessonId}`);
             const formEl = document.getElementById(`comment-form-${lessonId}`);
             const text = inputEl.value.trim();
             
-            // Xóa thông báo lỗi cũ (nếu có)
             const oldMsg = formEl.querySelector('.auth-message');
             if (oldMsg) oldMsg.style.display = 'none';
 
-            if (!text) return; // Không gửi nếu rỗng
+            if (!text) return;
             
             if (!currentUser || currentUser.isAnonymous) {
-                // Hiển thị thông báo lỗi ngay trên form
                 let msgEl = formEl.querySelector('.auth-message');
                 if (!msgEl) {
                     msgEl = document.createElement('div');
-                    msgEl.className = 'auth-message error'; // Dùng lại CSS của form auth
-                    formEl.prepend(msgEl); // Thêm vào đầu form
+                    msgEl.className = 'auth-message error';
+                    formEl.prepend(msgEl);
                 }
                 msgEl.textContent = 'Bạn cần Đăng nhập / Đăng ký để bình luận!';
                 msgEl.style.display = 'block';
                 return;
             }
             
-            // Đường dẫn public
             const collRef = collection(db, "artifacts", appId, "public", "data", "lessonComments");
             
             try {
-                // Tắt nút gửi
                 formEl.querySelector('button').disabled = true;
                 
                 await addDoc(collRef, {
                     lessonId: lessonId,
                     text: text,
                     userId: currentUser.uid,
-                    email: currentUser.email || null, // Lưu email (nếu có)
+                    email: currentUser.email || null,
                     timestamp: new Date()
                 });
-                inputEl.value = ''; // Xóa input
+                inputEl.value = '';
                 
             } catch (error) {
                 console.error("Lỗi khi gửi bình luận: ", error);
-                // Hiển thị lỗi
                 let msgEl = formEl.querySelector('.auth-message');
                 if (!msgEl) {
                     msgEl = document.createElement('div');
@@ -2832,48 +2899,39 @@
                 msgEl.textContent = 'Lỗi khi gửi bình luận. Vui lòng thử lại.';
                 msgEl.style.display = 'block';
             } finally {
-                // Mở lại nút gửi
                 formEl.querySelector('button').disabled = false;
             }
         }
         
-        // --- 8. (MỚI) TÍNH NĂNG AI - TỪ VỰNG MỖI NGÀY ---
+        // --- 8. TÍNH NĂNG AI - TỪ VỰNG MỖI NGÀY ---
 
-        // Hàm gọi API với exponential backoff
         async function fetchWithBackoff(url, options, maxRetries = 5) {
-            let delay = 1000; // 1 giây
+            let delay = 1000;
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     const response = await fetch(url, options);
                     if (!response.ok) {
-                        // Chỉ retry lỗi 429 (Too Many Requests)
                         if (response.status === 429) {
                             throw new Error('Rate limit exceeded');
                         }
-                        // Không retry các lỗi khác (vd: 400, 500)
                         return response; 
                     }
-                    return response; // Thành công
+                    return response;
                 } catch (error) {
-                    // Chỉ log lỗi retry, không log lỗi cuối cùng
                     if (i < maxRetries - 1) {
-                         // Không log lỗi ra console
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // Tăng gấp đôi thời gian chờ
+                        delay *= 2;
                     } else {
-                        throw error; // Ném lỗi cuối cùng
+                        throw error;
                     }
                 }
             }
         }
 
-
-        // Hàm lấy từ vựng (Gemini)
         async function fetchWordOfTheDay() {
-            if (isFetchingWord) return; // Không gọi nếu đang gọi
+            if (isFetchingWord) return;
             isFetchingWord = true;
             
-            // Cập nhật UI sang trạng thái loading
             wordLoadingEl.style.display = 'block';
             wordDisplayEl.style.display = 'none';
             wordErrorEl.style.display = 'none';
@@ -2921,9 +2979,7 @@
                     const jsonText = candidate.content.parts[0].text;
                     const data = JSON.parse(jsonText);
                     
-                    // Cập nhật UI
                     updateWordUI(data.term, data.definition, data.example);
-                    // Tạo hình ảnh
                     await generateImageForWord(data.term);
                     
                 } else {
@@ -2940,26 +2996,22 @@
             }
         }
         
-        // Cập nhật UI cho từ vựng
         function updateWordUI(term, definition, example) {
-            wordTermEl.textContent = term.charAt(0).toUpperCase() + term.slice(1); // Viết hoa chữ cái đầu
+            wordTermEl.textContent = term.charAt(0).toUpperCase() + term.slice(1);
             wordDefinitionEl.textContent = definition;
             wordExampleEl.textContent = example;
             
             wordLoadingEl.style.display = 'none';
-            wordDisplayEl.style.display = 'grid'; // Chuyển sang grid
+            wordDisplayEl.style.display = 'grid';
         }
         
-        // Hàm tạo hình ảnh (Imagen)
         async function generateImageForWord(term) {
-            // Hiển thị loading cho hình ảnh
-            wordImageEl.src = ""; // Xóa ảnh cũ
+            wordImageEl.src = "";
             wordImageEl.alt = "Đang tạo hình ảnh...";
-            // (Chúng ta có thể thêm 1 spinner nhỏ vào .word-image-container nếu muốn)
+            wordImageEl.classList.add('opacity-0'); // Ẩn ảnh cũ
+            wordImageEl.parentElement.classList.add('animate-pulse'); // Thêm hiệu ứng pulse
 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            
-            // Prompt chi tiết hơn để có hình ảnh đẹp
             const prompt = `Một hình ảnh minh họa đơn giản, thân thiện với trẻ em, phong cách hoạt hình (cartoon style) cho từ "${term}".`;
 
             const payload = {
@@ -2983,45 +3035,42 @@
                     const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
                     wordImageEl.src = imageUrl;
                     wordImageEl.alt = `Hình ảnh minh họa cho từ "${term}"`;
+                    wordImageEl.onload = () => {
+                        wordImageEl.parentElement.classList.remove('animate-pulse');
+                        wordImageEl.classList.remove('opacity-0');
+                    }
                 } else {
                     throw new Error("Không nhận được hình ảnh từ AI.");
                 }
             } catch (error) {
                 console.error("Lỗi khi tạo hình ảnh: ", error);
+                wordImageEl.parentElement.classList.remove('animate-pulse');
                 wordImageEl.src = `https://placehold.co/300x250/f0f0f0/aaa?text=Lỗi+tạo+ảnh`;
                 wordImageEl.alt = "Lỗi khi tạo hình ảnh";
+                wordImageEl.classList.remove('opacity-0');
             }
         }
 
 
-        // --- 9. (MỚI) TÍNH NĂNG BẢNG XẾP HẠNG (Viết điểm) ---
+        // --- 9. TÍNH NĂNG BẢNG XẾP HẠNG (Viết điểm) ---
 
-        /**
-         * Cập nhật tổng điểm của người dùng trên bảng xếp hạng (public).
-         * @param {number} scoreToAdd Số điểm muốn cộng thêm.
-         */
         async function updateUserScore(scoreToAdd) {
             if (!currentUser || currentUser.isAnonymous) {
-                // Không lưu điểm cho khách hoặc người dùng ẩn danh
                 console.log("Không lưu điểm (khách/ẩn danh).");
                 return; 
             }
             
-            if (scoreToAdd <= 0) return; // Không làm gì nếu điểm là 0
+            if (scoreToAdd <= 0) return;
 
-            // Đường dẫn public: /artifacts/{appId}/public/data/leaderboard/{userId}
             const docRef = doc(db, "artifacts", appId, "public", "data", "leaderboard", currentUser.uid);
 
             try {
-                // Sử dụng setDoc với { merge: true } và increment
-                // để tạo mới hoặc cập nhật tài liệu
                 await setDoc(docRef, {
-                    totalScore: increment(scoreToAdd), // Cộng dồn điểm
+                    totalScore: increment(scoreToAdd),
                     userId: currentUser.uid,
-                    // Lưu email để hiển thị (chỉ lưu phần trước @)
                     displayName: currentUser.email ? currentUser.email.split('@')[0] : currentUser.uid.substring(0, 6),
                     lastUpdated: new Date()
-                }, { merge: true }); // Merge: true để không ghi đè các trường khác nếu doc tồn tại
+                }, { merge: true });
 
                 console.log(`Đã cập nhật ${scoreToAdd} điểm cho user ${currentUser.uid} (public)`);
                 
@@ -3030,17 +3079,12 @@
             }
         }
         
-        // --- 10. (MỚI) TÍNH NĂNG BẢNG XẾP HẠNG (Đọc điểm) ---
+        // --- 10. TÍNH NĂNG BẢNG XẾP HẠNG (Đọc điểm) ---
 
         async function loadLeaderboard() {
             leaderboardContainerEl.innerHTML = '<p id="leaderboard-loading">Đang tải bảng xếp hạng...</p>';
             
-            // Đường dẫn public: /artifacts/{appId}/public/data/leaderboard
             const collRef = collection(db, "artifacts", appId, "public", "data", "leaderboard");
-            
-            // Tạo query: Lấy tất cả
-            // Chúng ta sẽ không dùng orderBy("totalScore", "desc") vì nó yêu cầu index
-            // Thay vào đó, chúng ta sẽ sắp xếp thủ công bằng JS
             const q = query(collRef); 
 
             try {
@@ -3056,13 +3100,10 @@
                     leaderboardData.push(doc.data());
                 });
                 
-                // Sắp xếp thủ công bằng JavaScript (giảm dần)
                 leaderboardData.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
                 
-                // Lấy 10 người đứng đầu
                 const top10 = leaderboardData.slice(0, 10);
 
-                // Render bảng
                 let html = `
                     <table class="leaderboard-table">
                         <thead>
@@ -3107,40 +3148,31 @@
         
         document.addEventListener('DOMContentLoaded', async () => {
             
-            // Khởi tạo Firebase
             try {
-                // firebaseConfig đã được định nghĩa ở trên
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 setLogLevel('Debug');
                 console.log("Firebase đã khởi tạo thành công.");
 
-                // Lắng nghe thay đổi trạng thái Auth
                 onAuthStateChanged(auth, (user) => {
                     if (user && !user.isAnonymous) {
-                        // Người dùng đã đăng nhập (có email)
                         currentUser = user;
                         loginLink.style.display = 'none';
                         registerLink.style.display = 'none';
                         profileLink.style.display = 'block';
                         logoutLink.style.display = 'block';
                     } else {
-                        // Người dùng ẩn danh hoặc đã đăng xuất
-                        currentUser = user; // (có thể là user ẩn danh, hoặc null)
+                        currentUser = user;
                         loginLink.style.display = 'block';
                         registerLink.style.display = 'block';
                         profileLink.style.display = 'none';
                         logoutLink.style.display = 'none';
                     }
                     
-                    // (MỚI) Tải lại dữ liệu trang khi auth thay đổi (ví dụ: đăng nhập/đăng xuất)
-                    // Cần tải lại tiến độ và bình luận
                     window.showPage(currentPage);
                 });
 
-                // Đăng nhập ban đầu
-                // token đã được định nghĩa ở trên
                 if (token) {
                     await signInWithCustomToken(auth, token);
                     console.log("Đăng nhập bằng Custom Token thành công.");
@@ -3151,15 +3183,12 @@
 
             } catch (error) {
                 console.error("Lỗi khởi tạo Firebase: ", error);
-                // Lỗi này thường xảy ra nếu firebaseConfig không hợp lệ
-                // Thông báo lỗi đã được hiển thị ở phần kiểm tra config
             }
 
             // Gán các Element cho biến
             videoModal = document.getElementById('video-modal');
             modalVideoTitle = document.getElementById('modal-video-title');
             modalVideoIframe = document.getElementById('modal-video-iframe');
-            // MỚI: Gán biến cho alert
             modalAlertContent = document.getElementById('modal-alert-content');
             modalAlertText = document.getElementById('modal-alert-text');
 
@@ -3173,7 +3202,6 @@
             profileUserIdEl = document.getElementById('profile-userid');
             profileLogoutBtn = document.getElementById('profile-logout-btn');
             profileQuizResultsEl = document.getElementById('profile-quiz-results');
-            // MỚI: Gán biến cho tiến độ bài học profile
             profileLessonProgressEl = document.getElementById('profile-lesson-progress');
 
             // Gán element cho Quiz
@@ -3189,7 +3217,6 @@
             flashcardGrid = document.getElementById('flashcard-grid');
             flipsEl = document.getElementById('flashcard-flips');
             
-            // MỚI: Gán element cho Game Word Connect
             wcGridEl = document.getElementById('wc-grid');
             wcFoundWordsEl = document.getElementById('wc-found-words');
             wcFoundListEl = document.getElementById('wc-found-list');
@@ -3198,7 +3225,6 @@
             wcNextLevelBtn = document.getElementById('wc-next-level-btn');
             wcLevelInfoEl = document.getElementById('wc-level-info');
 
-            // MỚI: Gán element cho Game Fill Blank
             fbSentenceStartEl = document.getElementById('fb-sentence-start');
             fbSentenceEndEl = document.getElementById('fb-sentence-end');
             fbInputEl = document.getElementById('fb-input');
@@ -3210,7 +3236,7 @@
             fbResultsScoreEl = document.getElementById('fb-results-score');
             fbRestartBtn = document.getElementById('fb-restart-btn');
 
-            // MỚI: Gán element cho tính năng AI
+            // Gán element cho tính năng AI
             wordLoadingEl = document.getElementById('word-loading');
             wordDisplayEl = document.getElementById('word-display');
             wordImageEl = document.getElementById('word-image');
@@ -3220,7 +3246,7 @@
             wordErrorEl = document.getElementById('word-error');
             newWordBtn = document.getElementById('new-word-btn');
             
-            // MỚI: Gán element cho Bảng xếp hạng
+            // Gán element cho Bảng xếp hạng
             leaderboardContainerEl = document.getElementById('leaderboard-table-container');
             leaderboardLoadingEl = document.getElementById('leaderboard-loading');
 
@@ -3228,11 +3254,9 @@
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('register-form').addEventListener('submit', handleRegister);
             
-            // MỚI: Thêm sự kiện cho game
             wcGridEl.addEventListener('mousedown', handleWCGridMouseStart);
             document.addEventListener('mousemove', handleWCGridMouseMove);
             document.addEventListener('mouseup', handleWCGridMouseEnd);
-            // Thêm sự kiện touch
             wcGridEl.addEventListener('touchstart', handleWCGridMouseStart, { passive: false });
             document.addEventListener('touchmove', handleWCGridMouseMove, { passive: false });
             document.addEventListener('touchend', handleWCGridMouseEnd);
@@ -3243,13 +3267,12 @@
             fbCheckBtn.addEventListener('click', checkFillBlankAnswer);
             fbRestartBtn.addEventListener('click', initFillBlankGame);
 
-            // MỚI: Thêm sự kiện cho nút AI
             newWordBtn.addEventListener('click', fetchWordOfTheDay);
 
             // Hiển thị trang chủ ban đầu
             window.showPage('home');
             
-            // MỚI: Tải từ vựng lần đầu khi vào trang
+            // Tải từ vựng lần đầu khi vào trang
             fetchWordOfTheDay();
         });
 
