@@ -52,6 +52,7 @@
         .btn-primary { background: var(--gradient-main); color: #ffffff; box-shadow: var(--shadow-md); }
         .btn-outline { background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
         .btn-danger { background-color: var(--error); color: white; }
+        .btn-warning { background-color: var(--warning); color: white; }
         .btn-sm { padding: 5px 10px; font-size: 0.85rem; }
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; color: white; }
         .badge-pending { background-color: var(--warning); }
@@ -95,6 +96,14 @@
         .stat-info p { color: var(--text-light); margin: 0; font-size: 0.9rem; }
         .stat-icon { font-size: 2rem; color: var(--border-color); opacity: 0.5; }
 
+        /* --- MANAGEMENT TABLE --- */
+        .manage-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .manage-table th { text-align: left; padding: 12px; background: var(--bg-color); color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--border-color); }
+        .manage-table td { padding: 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .manage-table tr:last-child td { border-bottom: none; }
+        .manage-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #eee; }
+        .manage-actions { display: flex; gap: 8px; }
+        
         /* --- EXAM STYLES --- */
         .exam-builder-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; background: var(--bg-color); }
         .exam-item-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid var(--border-color); }
@@ -143,6 +152,12 @@
         .lesson-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .completion-badge { position: absolute; top: 10px; right: 10px; background: var(--success); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
+        /* Vocabulary Table Styles */
+        .vocab-table { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid var(--border-color); }
+        .vocab-table th, .vocab-table td { padding: 10px; border: 1px solid var(--border-color); text-align: left; }
+        .vocab-table th { background: var(--bg-color); font-weight: 600; color: var(--text-dark); }
+        .vocab-row-input { display: grid; grid-template-columns: 1fr 1fr 1fr 40px; gap: 10px; margin-bottom: 10px; align-items: center;}
+
         /* Loading & Toast */
         #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -159,6 +174,8 @@
             .sidebar.show { display: block; }
             .mobile-menu-btn { display: block; }
             .exam-options { grid-template-columns: 1fr; } 
+            .vocab-row-input { grid-template-columns: 1fr; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;}
+            .manage-actions { flex-direction: column; }
         }
     </style>
 </head>
@@ -216,7 +233,7 @@
                 </div>
                 <!-- Teacher Menu -->
                 <div id="teacher-menu" class="hidden">
-                    <div class="menu-item active" onclick="navigate('teacher-create-lesson')"><i class="fa-solid fa-pen-to-square"></i> Bài học</div>
+                    <div class="menu-item active" onclick="navigate('teacher-lesson-manage')"><i class="fa-solid fa-pen-to-square"></i> Quản lý Bài giảng</div>
                     <div class="menu-item" onclick="navigate('teacher-create-quiz')"><i class="fa-solid fa-circle-question"></i> Ngân hàng Câu hỏi</div>
                     <div class="menu-item" onclick="navigate('teacher-writing-manage')"><i class="fa-solid fa-clipboard-check"></i> Quản lý Writing</div>
                     <div class="menu-item" onclick="navigate('teacher-exam-manage')"><i class="fa-solid fa-scroll"></i> Quản lý Thi</div>
@@ -241,6 +258,56 @@
                             <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
                         </div>
                     </div>
+                </div>
+
+                <!-- TEACHER: LESSON MANAGEMENT (NEW) -->
+                <div id="view-teacher-lesson-manage" class="view-section hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 class="section-title" style="margin-bottom: 0;">Quản lý Bài giảng</h2>
+                        <button class="btn btn-primary" onclick="navigate('teacher-create-lesson')"><i class="fa-solid fa-plus"></i> Soạn bài mới</button>
+                    </div>
+                    <div class="card">
+                        <div style="overflow-x: auto;">
+                            <table class="manage-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ảnh</th>
+                                        <th>Tiêu đề bài học</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacher-lesson-table-body">
+                                    <!-- Lessons injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="teacher-no-lessons-msg" style="text-align: center; padding: 20px; color: var(--text-light); display: none;">Chưa có bài giảng nào.</div>
+                    </div>
+                </div>
+
+                <!-- TEACHER: CREATE/EDIT LESSON -->
+                <div id="view-teacher-create-lesson" class="view-section hidden">
+                     <h2 class="section-title" id="form-title">Soạn bài giảng mới</h2>
+                     <div class="card">
+                        <form id="create-lesson-form">
+                            <div class="input-group"><label>Tiêu đề bài học</label><input type="text" id="lesson-title" class="input-field" required></div>
+                            <div class="input-group"><label>Mô tả ngắn</label><input type="text" id="lesson-desc" class="input-field" required></div>
+                            <div class="input-group"><label>Hình ảnh (URL)</label><input type="url" id="lesson-image" class="input-field"></div>
+                            <div class="input-group"><label>Nội dung</label><textarea id="lesson-content" class="input-field" required></textarea></div>
+                            <div class="input-group"><label>Từ vựng</label>
+                                <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                    <div id="vocab-input-container"></div>
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="addVocabRow()">+ Thêm từ</button>
+                                </div>
+                            </div>
+                            <div class="input-group"><label>Video (Embed URL)</label><input type="text" id="lesson-video" class="input-field"></div>
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button type="submit" id="form-submit-btn" class="btn btn-primary">Đăng bài</button>
+                                <button type="button" class="btn btn-outline" onclick="navigate('teacher-lesson-manage')">Hủy bỏ</button>
+                            </div>
+                        </form>
+                     </div>
                 </div>
 
                 <!-- STUDENT: EXAM LIST -->
@@ -412,27 +479,6 @@
                     </div>
                 </div>
 
-                <div id="view-teacher-create-lesson" class="view-section hidden">
-                     <!-- Copied from prev, enhanced -->
-                     <h2 class="section-title" id="form-title">Soạn bài giảng mới</h2>
-                     <div class="card">
-                        <form id="create-lesson-form">
-                            <div class="input-group"><label>Tiêu đề bài học</label><input type="text" id="lesson-title" class="input-field" required></div>
-                            <div class="input-group"><label>Mô tả ngắn</label><input type="text" id="lesson-desc" class="input-field" required></div>
-                            <div class="input-group"><label>Hình ảnh (URL)</label><input type="url" id="lesson-image" class="input-field"></div>
-                            <div class="input-group"><label>Nội dung</label><textarea id="lesson-content" class="input-field" required></textarea></div>
-                            <div class="input-group"><label>Từ vựng</label>
-                                <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                    <div id="vocab-input-container"></div>
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="addVocabRow()">+ Thêm từ</button>
-                                </div>
-                            </div>
-                            <div class="input-group"><label>Video (Embed URL)</label><input type="text" id="lesson-video" class="input-field"></div>
-                            <button type="submit" id="form-submit-btn" class="btn btn-primary">Đăng bài</button>
-                            <button type="button" id="btn-cancel-edit" class="btn btn-outline hidden" onclick="cancelEdit()">Hủy</button>
-                        </form>
-                     </div>
-                </div>
                 <div id="view-teacher-create-quiz" class="view-section hidden">
                     <h2 class="section-title">Tạo Ngân hàng Câu hỏi</h2>
                     <div class="card">
@@ -566,6 +612,7 @@
             else if (viewId === 'leaderboard') { show('view-leaderboard'); fetchLeaderboard(); }
             else if (viewId === 'teacher-create-quiz') { show('view-teacher-create-quiz'); }
             else if (viewId === 'teacher-create-lesson') { resetLessonForm(); show('view-teacher-create-lesson'); }
+            else if (viewId === 'teacher-lesson-manage') { show('view-teacher-lesson-manage'); fetchTeacherLessonList(); }
             else {
                  try { show(`view-${viewId}`); } catch(e) {}
             }
@@ -596,7 +643,7 @@
                 show('teacher-menu'); hide('student-menu'); 
                 show('teacher-stats-section'); // Show stats for teacher
                 fetchTeacherStats();
-                window.navigate('teacher-create-lesson'); 
+                window.navigate('teacher-lesson-manage'); 
             } else { 
                 show('student-menu'); hide('teacher-menu'); 
                 hide('teacher-stats-section');
@@ -615,6 +662,41 @@
                 get('stat-exams').textContent = examSnap.size;
                 get('stat-pending').textContent = pendingSnap.size;
             } catch(e) { console.log("Stats error", e); }
+        }
+
+        // --- TEACHER: LESSON MANAGEMENT (Table) ---
+        async function fetchTeacherLessonList() {
+            toggleLoading(true);
+            const tbody = get('teacher-lesson-table-body'); tbody.innerHTML = '';
+            try {
+                const q = query(collection(db, PUBLIC_DATA_PATH, 'lessons'), orderBy('createdAt', 'desc'));
+                const snap = await getDocs(q);
+                if(snap.empty) {
+                     get('teacher-no-lessons-msg').style.display = 'block';
+                } else {
+                     get('teacher-no-lessons-msg').style.display = 'none';
+                     snap.forEach(doc => {
+                         const d = doc.data();
+                         const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                         const img = d.image ? `<img src="${d.image}" class="manage-thumb">` : '<div class="manage-thumb" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-book"></i></div>';
+                         
+                         tbody.innerHTML += `
+                            <tr>
+                                <td>${img}</td>
+                                <td><div style="font-weight:bold;">${d.title}</div><div style="color:var(--text-light);font-size:0.85rem;">${d.desc}</div></td>
+                                <td>${date}</td>
+                                <td>
+                                    <div class="manage-actions">
+                                        <button class="btn btn-warning btn-sm" onclick="editLesson('${doc.id}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteLesson('${doc.id}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                    </div>
+                                </td>
+                            </tr>
+                         `;
+                     });
+                }
+            } catch(e) { console.error(e); showToast("Lỗi tải danh sách bài giảng"); }
+            toggleLoading(false);
         }
 
         // --- LESSON LOGIC (STUDENT & TEACHER) ---
@@ -651,16 +733,8 @@
                  const imgContent = d.image ? '' : '<i class="fa-solid fa-book"></i>';
                  const completedBadge = d.completed ? '<div class="completion-badge"><i class="fa-solid fa-check"></i> Đã học</div>' : '';
                  
-                 let teacherControls = '';
-                 if (currentRole === 'teacher') {
-                        teacherControls = `
-                            <div class="teacher-controls">
-                                <button class="btn btn-warning btn-sm" onclick="editLesson('${d.id}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteLesson('${d.id}')"><i class="fa-solid fa-trash"></i> Xóa</button>
-                            </div>
-                        `;
-                 }
-
+                 // In Student View, we DON'T show Teacher Controls anymore (Teacher has dedicated view)
+                 
                  list.innerHTML += `
                     <div class="lesson-card">
                         ${completedBadge}
@@ -669,7 +743,6 @@
                             <div class="lesson-title">${d.title}</div>
                             <div class="lesson-desc">${d.desc}</div>
                             <button class="btn btn-outline" style="width:100%" onclick="openLesson('${d.id}')">Học ngay</button>
-                            ${teacherControls}
                         </div>
                     </div>`;
             });
@@ -840,24 +913,64 @@
             toggleLoading(false);
         }
 
-        // --- OTHER STUBS (Copied/Minified from prev to maintain functionality) ---
-        window.resetLessonForm = () => { editingLessonId = null; get('create-lesson-form').reset(); get('form-title').textContent="Soạn bài mới"; get('form-submit-btn').textContent="Đăng bài"; hide('btn-cancel-edit'); get('vocab-input-container').innerHTML=''; addVocabRow(); }
-        window.cancelEdit = () => resetLessonForm();
-        window.deleteLesson = async (id) => { if(confirm("Xóa?")) { await deleteDoc(doc(db, PUBLIC_DATA_PATH, "lessons", id)); fetchLessons(); } }
+        // --- CRUD FUNCTIONS (Expanded) ---
+        window.resetLessonForm = () => { editingLessonId = null; get('create-lesson-form').reset(); get('form-title').textContent="Soạn bài mới"; get('form-submit-btn').textContent="Đăng bài"; get('vocab-input-container').innerHTML=''; addVocabRow(); }
+        window.cancelEdit = () => { resetLessonForm(); navigate('teacher-lesson-manage'); }
+        
+        window.deleteLesson = async (id) => { 
+            if(confirm("Bạn có chắc chắn muốn xóa bài giảng này không?")) { 
+                toggleLoading(true);
+                try {
+                    await deleteDoc(doc(db, PUBLIC_DATA_PATH, "lessons", id)); 
+                    showToast("Đã xóa thành công");
+                    fetchTeacherLessonList(); // Refresh table
+                } catch(e) { showToast("Lỗi xóa: " + e.message); }
+                toggleLoading(false);
+            } 
+        }
+
         window.editLesson = async (id) => {
+             toggleLoading(true);
              const d = await getDoc(doc(db, PUBLIC_DATA_PATH, "lessons", id));
              if(d.exists()){
-                 const data=d.data(); editingLessonId=id; get('lesson-title').value=data.title; get('lesson-desc').value=data.desc; get('lesson-image').value=data.image||''; get('lesson-content').value=data.content; get('lesson-video').value=data.video||'';
-                 get('vocab-input-container').innerHTML=''; if(data.vocabList) data.vocabList.forEach(v=>addVocabRow(v.word,v.ipa,v.meaning)); else addVocabRow();
-                 get('form-title').textContent="Sửa bài"; get('form-submit-btn').textContent="Cập nhật"; show('btn-cancel-edit'); navigate('teacher-create-lesson');
+                 const data=d.data(); editingLessonId=id; 
+                 get('lesson-title').value=data.title; 
+                 get('lesson-desc').value=data.desc; 
+                 get('lesson-image').value=data.image||''; 
+                 get('lesson-content').value=data.content; 
+                 get('lesson-video').value=data.video||'';
+                 get('vocab-input-container').innerHTML=''; 
+                 if(data.vocabList && data.vocabList.length > 0) {
+                    data.vocabList.forEach(v=>addVocabRow(v.word,v.ipa,v.meaning));
+                 } else {
+                    addVocabRow();
+                 }
+                 get('form-title').textContent="Chỉnh sửa bài giảng"; 
+                 get('form-submit-btn').textContent="Cập nhật"; 
+                 show('btn-cancel-edit'); 
+                 navigate('teacher-create-lesson');
              }
+             toggleLoading(false);
         }
+
         get('create-lesson-form').addEventListener('submit', async(e)=>{
              e.preventDefault(); toggleLoading(true);
              const vRows=document.querySelectorAll('.vocab-row-input'); let vData=[]; vRows.forEach(r=>{ if(r.querySelector('.vocab-word').value) vData.push({word:r.querySelector('.vocab-word').value, ipa:r.querySelector('.vocab-ipa').value, meaning:r.querySelector('.vocab-mean').value}) });
              const data={title:get('lesson-title').value, desc:get('lesson-desc').value, image:get('lesson-image').value, content:get('lesson-content').value, video:get('lesson-video').value, vocabList:vData, author:currentUser.email, ...(editingLessonId?{updatedAt:new Date()}:{createdAt:new Date()})};
-             try{ if(editingLessonId) await updateDoc(doc(db, PUBLIC_DATA_PATH, "lessons", editingLessonId), data); else await addDoc(collection(db, PUBLIC_DATA_PATH, "lessons"), data); showToast("Lưu thành công"); resetLessonForm(); } catch(err){showToast(err.message)} toggleLoading(false);
+             try{ 
+                 if(editingLessonId) {
+                    await updateDoc(doc(db, PUBLIC_DATA_PATH, "lessons", editingLessonId), data); 
+                    showToast("Cập nhật thành công");
+                 } else {
+                    await addDoc(collection(db, PUBLIC_DATA_PATH, "lessons"), data); 
+                    showToast("Đã thêm bài giảng mới");
+                 }
+                 resetLessonForm(); 
+                 navigate('teacher-lesson-manage'); // Go back to list
+             } catch(err){showToast(err.message)} 
+             toggleLoading(false);
         });
+        
         // ... (Quiz, Leaderboard, Exam functions kept as is from previous context but mapped globally)
         window.fetchStudentWriting = fetchStudentWriting; window.fetchTeacherPendingSubmissions = fetchTeacherPendingSubmissions;
         async function fetchTeacherExams(){ /* Simplification for brevity, fully functional logic in prev response */ const l=get('teacher-exam-list'); l.innerHTML=''; const s=await getDocs(query(collection(db,PUBLIC_DATA_PATH,'exams'),orderBy('createdAt','desc'))); s.forEach(d=>{l.innerHTML+=`<div class="card"><b>${d.data().title}</b> (${d.data().status})</div>`}); }
