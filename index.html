@@ -1,991 +1,803 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="light">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electro Mind - Electrical Engineering Learning</title>
+    <title>Biệt Đội Giao Thông Xanh - TH Nam Hà</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Baloo 2 (Vui nhộn, hỗ trợ Tiếng Việt tốt) & Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['"Baloo 2"', 'cursive', 'sans-serif'],
+                    },
+                    colors: {
+                        traffic: {
+                            red: '#FF5252',
+                            yellow: '#FFD740', 
+                            green: '#00E676',
+                            dark: '#2C3E50', // Asphalt
+                            light: '#ECEFF1',
+                        },
+                        brand: {
+                            blue: '#448AFF',
+                        }
+                    },
+                    boxShadow: {
+                        'cartoon': '0 6px 0 rgba(0,0,0,0.15)',
+                        'cartoon-hover': '0 3px 0 rgba(0,0,0,0.15)',
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Leaflet & Modules -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js",
+        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+      }
+    }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* --- CSS VARIABLES & RESET --- */
-        :root {
-            /* Light Theme */
-            --primary-color: #6366f1;
-            --secondary-color: #a855f7;
-            --bg-color: #f3f4f6;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --white: #ffffff;
-            --card-bg: #ffffff;
-            --border-color: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b; 
-            --error: #ef4444;
-            --gradient-main: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --gradient-hero: linear-gradient(100deg, #7c3aed 0%, #3b82f6 100%);
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --radius: 12px;
+        body { 
+            background-color: #f0f4f8; 
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
         }
+        
+        /* Map Styles */
+        .custom-div-icon { background: transparent; border: none; }
+        .leaflet-popup-content-wrapper { border-radius: 1rem; border: 3px solid #FFD740; box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+        .leaflet-popup-content { font-family: 'Nunito', sans-serif; font-weight: 700; margin: 0.8rem; }
+        .cursor-crosshair { cursor: crosshair !important; }
+        
+        /* Interactive Elements */
+        .btn-cartoon { transition: all 0.1s; }
+        .btn-cartoon:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(0,0,0,0.15) !important; }
 
-        /* Dark Theme Variables */
-        [data-theme="dark"] {
-            --bg-color: #111827;
-            --text-dark: #f3f4f6;
-            --text-light: #9ca3af;
-            --white: #1f2937;
-            --card-bg: #1f2937;
-            --border-color: #374151;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        /* Rich Text */
+        .rte-content h1, .rte-content h2 { font-family: 'Baloo 2', cursive; color: #2C3E50; }
+        .rte-content img { border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; max-width: 100%; height: auto; }
+        
+        /* Pulse for Map */
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        body { background-color: var(--bg-color); color: var(--text-dark); line-height: 1.5; }
-        
-        /* --- UTILITIES --- */
-        .hidden { display: none !important; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .btn-primary { background: var(--gradient-main); color: #ffffff; box-shadow: var(--shadow-md); }
-        .btn-outline { background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
-        .btn-danger { background-color: var(--error); color: white; }
-        .btn-warning { background-color: var(--warning); color: white; }
-        .btn-sm { padding: 5px 10px; font-size: 0.85rem; }
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; color: white; }
-        .badge-pending { background-color: var(--warning); }
-        .badge-graded { background-color: var(--success); }
-        .badge-closed { background-color: var(--text-light); }
-        .badge-open { background-color: var(--success); }
-
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-dark); }
-        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-dark); transition: border-color 0.2s; }
-        .input-field:focus { outline: none; border-color: var(--primary-color); ring: 2px solid var(--primary-color); }
-        textarea.input-field { resize: vertical; min-height: 100px; }
-
-        /* --- LAYOUT --- */
-        #auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: url('https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070') no-repeat center/cover; }
-        .auth-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; color: #1f2937; } /* Force light text for auth card */
-        .role-switch { display: flex; background: #e5e7eb; border-radius: 8px; padding: 4px; margin-bottom: 20px; }
-        .role-btn { flex: 1; padding: 8px; border-radius: 6px; border: none; background: transparent; font-weight: 600; cursor: pointer; color: #6b7280; }
-        .role-btn.active { background: #ffffff; color: var(--primary-color); box-shadow: var(--shadow-sm); }
-
-        header { background: var(--card-bg); box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 100; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; height: 70px; }
-        .nav-left { display: flex; align-items: center; gap: 15px; }
-        .nav-logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
-        .nav-controls { display: flex; align-items: center; gap: 10px; }
-        .theme-toggle { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--text-dark); }
-        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; color: var(--text-dark); cursor: pointer; }
-
-        .main-grid { display: grid; grid-template-columns: 250px 1fr; gap: 30px; padding-top: 30px; padding-bottom: 50px; }
-        .sidebar { background: var(--card-bg); border-radius: var(--radius); padding: 20px; height: fit-content; box-shadow: var(--shadow-sm); }
-        .menu-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: var(--text-light); cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s; }
-        .menu-item:hover, .menu-item.active { background: rgba(99, 102, 241, 0.1); color: var(--primary-color); }
-        
-        .card { background: var(--card-bg); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-sm); margin-bottom: 20px; border: 1px solid var(--border-color); }
-        .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--text-dark); border-left: 5px solid var(--secondary-color); padding-left: 15px; }
-
-        /* --- STATS CARD (TEACHER) --- */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius); border-left: 4px solid var(--primary-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; }
-        .stat-info h3 { font-size: 2rem; font-weight: 700; margin: 0; color: var(--primary-color); }
-        .stat-info p { color: var(--text-light); margin: 0; font-size: 0.9rem; }
-        .stat-icon { font-size: 2rem; color: var(--border-color); opacity: 0.5; }
-
-        /* --- MANAGEMENT TABLE --- */
-        .manage-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .manage-table th { text-align: left; padding: 12px; background: var(--bg-color); color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid var(--border-color); }
-        .manage-table td { padding: 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .manage-table tr:last-child td { border-bottom: none; }
-        .manage-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #eee; }
-        .manage-actions { display: flex; gap: 8px; }
-        
-        /* --- EXAM STYLES --- */
-        .exam-builder-list { max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; background: var(--bg-color); }
-        .exam-item-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid var(--border-color); }
-        .exam-item-row:last-child { border-bottom: none; }
-        
-        .exam-room-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; overflow-y: auto; display: flex; flex-direction: column; }
-        .exam-header { background: var(--text-dark); color: var(--bg-color); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2001; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .timer-box { font-size: 1.5rem; font-weight: bold; color: #fbbf24; font-family: monospace; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 8px; }
-        .exam-body { max-width: 1000px; margin: 0 auto; padding: 30px 20px; flex: 1; }
-        
-        .exam-section-title { background: rgba(99, 102, 241, 0.1); padding: 10px 15px; border-left: 4px solid var(--primary-color); font-weight: bold; margin: 20px 0 15px 0; color: var(--primary-color); }
-        .exam-question-card { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
-        .exam-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .exam-option-label { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; transition: all 0.2s; }
-        .exam-option-label:hover { background: var(--bg-color); border-color: var(--primary-color); }
-        .exam-option-label input:checked + span { font-weight: bold; color: var(--primary-color); }
-
-        /* Writing Styles */
-        .writing-prompt-box { background: rgba(253, 186, 116, 0.1); border: 1px solid #fdba74; padding: 15px; border-radius: 8px; margin-bottom: 15px; color: #d97706; }
-        .submission-box { background: var(--bg-color); border-radius: 8px; padding: 15px; border: 1px dashed var(--border-color); margin-top: 15px; }
-        .writing-item { border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 15px; background: var(--card-bg); transition: all 0.2s; }
-        .writing-item:hover { border-color: var(--primary-color); box-shadow: var(--shadow-sm); }
-        
-        /* Leaderboard Table */
-        .leaderboard-table { width: 100%; border-collapse: collapse; }
-        .leaderboard-table th { text-align: left; padding: 15px; background: var(--bg-color); color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; }
-        .leaderboard-table td { padding: 15px; border-bottom: 1px solid var(--border-color); }
-        .rank-1 { color: #fbbf24; font-weight: bold; } .rank-2 { color: #9ca3af; font-weight: bold; } .rank-3 { color: #b45309; font-weight: bold; }
-
-        /* Hero Section */
-        .hero-section { background: var(--gradient-hero); border-radius: 20px; padding: 30px 40px; position: relative; overflow: hidden; min-height: 300px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; color: white; box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4); }
-        .hero-right { display: flex; gap: 20px; z-index: 2; flex-wrap: wrap; justify-content: center;}
-        .hero-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; width: 200px; text-align: center; color: #1f2937; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s; }
-        .hero-card:hover { transform: translateY(-5px); }
-        .hero-card h3 { font-size: 1rem; margin: 10px 0; font-weight: 700; }
-
-        /* Lesson Cards & Search */
-        .search-bar-container { display: flex; margin-bottom: 20px; gap: 10px; }
-        .search-input { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-dark); }
-        .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .lesson-card { background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform 0.2s; border: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative; }
-        .lesson-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
-        .lesson-img { height: 180px; background-size: cover; background-position: center; background-color: #ddd; display: flex; align-items: center; justify-content: center; position: relative;}
-        .lesson-img.no-image { background: var(--gradient-main); }
-        .lesson-img.no-image i { font-size: 3rem; color: white; }
-        .lesson-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-        .completion-badge { position: absolute; top: 10px; right: 10px; background: var(--success); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
-        /* Vocabulary Table Styles */
-        .vocab-table { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid var(--border-color); }
-        .vocab-table th, .vocab-table td { padding: 10px; border: 1px solid var(--border-color); text-align: left; }
-        .vocab-table th { background: var(--bg-color); font-weight: 600; color: var(--text-dark); }
-        .vocab-row-input { display: grid; grid-template-columns: 1fr 1fr 1fr 40px; gap: 10px; margin-bottom: 10px; align-items: center;}
-
-        /* Loading & Toast */
-        #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; background: var(--text-dark); color: var(--bg-color); border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0; transition: opacity 0.3s; z-index: 10000; border: 1px solid var(--border-color); }
-        .toast.show { opacity: 1; }
-
-        @media (max-width: 768px) { 
-            .main-grid { grid-template-columns: 1fr; } 
-            .hero-section { flex-direction: column; text-align: center; } 
-            .hero-left { margin-bottom: 20px; }
-            .hero-character-img { display: none; }
-            .sidebar { display: none; position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px); z-index: 99; overflow-y: auto; border-radius: 0; }
-            .sidebar.show { display: block; }
-            .mobile-menu-btn { display: block; }
-            .exam-options { grid-template-columns: 1fr; } 
-            .vocab-row-input { grid-template-columns: 1fr; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;}
-            .manage-actions { flex-direction: column; }
+        .user-location-icon {
+            background-color: #3b82f6;
+            border: 3px solid white;
+            border-radius: 50%;
+            animation: pulse-blue 2s infinite;
         }
+        /* Leaflet Z-Index fix */
+        .leaflet-pane { z-index: 10; }
+        .leaflet-top, .leaflet-bottom { z-index: 20; }
     </style>
 </head>
-<body>
+<body class="text-slate-700 antialiased selection:bg-traffic-yellow selection:text-slate-900">
+    <div id="root"></div>
 
-    <div id="loading-overlay"><div class="spinner"></div></div>
-    <div id="toast" class="toast">Thông báo</div>
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef, useMemo } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+          Map, AlertTriangle, FileText, Megaphone, Shield, 
+          Award, LogIn, Plus, Trash2, Save, Menu, X, Edit,
+          Navigation, Info, User, Layout, MapPin, CheckSquare, XCircle,
+          Eye, EyeOff, MousePointer2, Undo2, ArrowLeft, Calendar,
+          Bold, Italic, Underline, Search, MessageSquare, CheckCircle, HelpCircle, LocateFixed,
+          GraduationCap, BookOpen, Star, Heart, Camera, Flag, Siren, Layers
+        } from 'lucide-react';
+        import { initializeApp } from 'firebase/app';
+        import { 
+          getFirestore, collection, addDoc, getDocs, 
+          deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, limit, where 
+        } from 'firebase/firestore';
+        import { 
+          getAuth, signInWithEmailAndPassword, signOut, 
+          onAuthStateChanged 
+        } from 'firebase/auth';
 
-    <!-- 1. AUTH SCREEN -->
-    <section id="auth-screen">
-        <div class="auth-card">
-            <h1 style="font-size:2rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:10px;">Electro Mind</h1>
-            <p style="margin-bottom:20px; color:#6b7280">Hệ thống Học & Thi trực tuyến</p>
-            <div class="role-switch">
-                <button class="role-btn active" onclick="switchAuthRole('student')">Sinh viên</button>
-                <button class="role-btn" onclick="switchAuthRole('teacher')">Giáo viên</button>
-            </div>
-            <form id="auth-form">
-                <div class="input-group"><label style="color:#1f2937">Email</label><input type="email" id="email" class="input-field" placeholder="user@example.com" style="background:#fff; border:1px solid #d1d5db; color:#1f2937" required></div>
-                <div class="input-group"><label style="color:#1f2937">Mật khẩu</label><input type="password" id="password" class="input-field" placeholder="******" style="background:#fff; border:1px solid #d1d5db; color:#1f2937" required></div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Đăng nhập</button>
-                <button type="button" id="btn-signup" class="btn btn-outline" style="width: 100%;">Đăng ký</button>
-            </form>
-        </div>
-    </section>
+        // --- Error Boundary ---
+        class ErrorBoundary extends React.Component {
+            constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+            static getDerivedStateFromError(error) { return { hasError: true, error }; }
+            render() {
+                if (this.state.hasError) return <div className="p-8 text-center text-red-500 font-bold bg-white rounded-xl shadow-cartoon m-4">Ôi hỏng rồi! Gọi đội cứu hộ thôi! 🚑 <br/><button onClick={() => window.location.reload()} className="mt-4 bg-traffic-blue text-white px-4 py-2 rounded-full">Thử lại</button></div>;
+                return this.props.children;
+            }
+        }
 
-    <!-- 2. DASHBOARD -->
-    <section id="app-dashboard" class="hidden">
-        <header>
-            <div class="container navbar">
-                <div class="nav-left">
-                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-                    <div class="nav-logo"><i class="fa-solid fa-bolt"></i> <span>Electro Mind</span></div>
-                </div>
-                <div class="nav-controls">
-                    <button class="theme-toggle" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
-                    <div class="user-info">
-                        <span class="user-badge" id="user-badge">Student</span>
-                        <span id="user-email" style="font-weight: 600; display: none; md:block; font-size: 0.9rem;">user@email.com</span>
-                        <button onclick="handleLogout()" class="btn btn-outline" style="padding: 5px 10px;"><i class="fa-solid fa-right-from-bracket"></i></button>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <div class="container main-grid">
-            <aside class="sidebar" id="main-sidebar">
-                <!-- Student Menu -->
-                <div id="student-menu" class="hidden">
-                    <div class="menu-item active" onclick="navigate('student-lessons')"><i class="fa-solid fa-book-open"></i> Học tập</div>
-                    <div class="menu-item" onclick="navigate('student-quiz')"><i class="fa-solid fa-gamepad"></i> Quiz Practice</div>
-                    <div class="menu-item" onclick="navigate('student-writing')"><i class="fa-solid fa-pen-nib"></i> Bài tập Viết</div>
-                    <div class="menu-item" onclick="navigate('student-exams')"><i class="fa-solid fa-clock"></i> Phòng Thi</div>
-                    <div class="menu-item" onclick="navigate('leaderboard')"><i class="fa-solid fa-trophy"></i> Bảng xếp hạng</div>
-                </div>
-                <!-- Teacher Menu -->
-                <div id="teacher-menu" class="hidden">
-                    <div class="menu-item active" onclick="navigate('teacher-lesson-manage')"><i class="fa-solid fa-pen-to-square"></i> Quản lý Bài giảng</div>
-                    <div class="menu-item" onclick="navigate('teacher-create-quiz')"><i class="fa-solid fa-circle-question"></i> Ngân hàng Câu hỏi</div>
-                    <div class="menu-item" onclick="navigate('teacher-writing-manage')"><i class="fa-solid fa-clipboard-check"></i> Quản lý Writing</div>
-                    <div class="menu-item" onclick="navigate('teacher-exam-manage')"><i class="fa-solid fa-scroll"></i> Quản lý Thi</div>
-                </div>
-            </aside>
-
-            <main class="content-area">
-                
-                <!-- TEACHER STATS OVERVIEW (Inject dynamically if Teacher) -->
-                <div id="teacher-stats-section" class="hidden">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-info"><h3 id="stat-lessons">0</h3><p>Bài giảng</p></div>
-                            <div class="stat-icon"><i class="fa-solid fa-book"></i></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-info"><h3 id="stat-pending">0</h3><p>Cần chấm</p></div>
-                            <div class="stat-icon"><i class="fa-solid fa-pen-ruler"></i></div>
-                        </div>
-                         <div class="stat-card">
-                            <div class="stat-info"><h3 id="stat-exams">0</h3><p>Đề thi</p></div>
-                            <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TEACHER: LESSON MANAGEMENT (NEW) -->
-                <div id="view-teacher-lesson-manage" class="view-section hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 class="section-title" style="margin-bottom: 0;">Quản lý Bài giảng</h2>
-                        <button class="btn btn-primary" onclick="navigate('teacher-create-lesson')"><i class="fa-solid fa-plus"></i> Soạn bài mới</button>
-                    </div>
-                    <div class="card">
-                        <div style="overflow-x: auto;">
-                            <table class="manage-table">
-                                <thead>
-                                    <tr>
-                                        <th>Ảnh</th>
-                                        <th>Tiêu đề bài học</th>
-                                        <th>Ngày tạo</th>
-                                        <th>Hành động</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="teacher-lesson-table-body">
-                                    <!-- Lessons injected here -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="teacher-no-lessons-msg" style="text-align: center; padding: 20px; color: var(--text-light); display: none;">Chưa có bài giảng nào.</div>
-                    </div>
-                </div>
-
-                <!-- TEACHER: CREATE/EDIT LESSON -->
-                <div id="view-teacher-create-lesson" class="view-section hidden">
-                     <h2 class="section-title" id="form-title">Soạn bài giảng mới</h2>
-                     <div class="card">
-                        <form id="create-lesson-form">
-                            <div class="input-group"><label>Tiêu đề bài học</label><input type="text" id="lesson-title" class="input-field" required></div>
-                            <div class="input-group"><label>Mô tả ngắn</label><input type="text" id="lesson-desc" class="input-field" required></div>
-                            <div class="input-group"><label>Hình ảnh (URL)</label><input type="url" id="lesson-image" class="input-field"></div>
-                            <div class="input-group"><label>Nội dung</label><textarea id="lesson-content" class="input-field" required></textarea></div>
-                            <div class="input-group"><label>Từ vựng</label>
-                                <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                    <div id="vocab-input-container"></div>
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="addVocabRow()">+ Thêm từ</button>
-                                </div>
-                            </div>
-                            <div class="input-group"><label>Video (Embed URL)</label><input type="text" id="lesson-video" class="input-field"></div>
-                            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                <button type="submit" id="form-submit-btn" class="btn btn-primary">Đăng bài</button>
-                                <button type="button" class="btn btn-outline" onclick="navigate('teacher-lesson-manage')">Hủy bỏ</button>
-                            </div>
-                        </form>
-                     </div>
-                </div>
-
-                <!-- STUDENT: EXAM LIST -->
-                <div id="view-student-exams" class="view-section hidden">
-                    <h2 class="section-title">Danh sách Bài thi</h2>
-                    <div id="student-exam-list-container" class="lesson-grid"></div>
-                </div>
-
-                <!-- STUDENT: EXAM ROOM (FULL SCREEN) -->
-                <div id="view-student-exam-room" class="hidden exam-room-container">
-                    <div class="exam-header">
-                        <div style="font-size:1.2rem; font-weight:bold;" id="exam-room-title">Tên bài thi</div>
-                        <div class="timer-box" id="exam-timer">00:00</div>
-                        <button onclick="submitExam()" class="btn btn-primary" style="background: #ef4444;">Nộp bài</button>
-                    </div>
-                    <div class="exam-body">
-                        <div id="exam-questions-area"></div>
-                        <div id="exam-writing-area" style="margin-top:30px;">
-                            <div class="exam-section-title">PHẦN 2: KỸ NĂNG VIẾT</div>
-                            <div id="exam-writing-prompt" class="writing-prompt-box"></div>
-                            <textarea id="exam-writing-input" class="input-field" rows="10" placeholder="Làm bài viết tại đây..."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TEACHER: EXAM MANAGEMENT -->
-                <div id="view-teacher-exam-manage" class="view-section hidden">
-                    <h2 class="section-title">Quản lý Thi Cử</h2>
-                    <button class="btn btn-primary" onclick="openExamBuilder()">+ Tạo Đề Thi Mới</button>
-                    <h3 style="margin-top:30px;">Danh sách Đề thi</h3>
-                    <div id="teacher-exam-list" style="margin-bottom:30px;"></div>
-                    <h3>Bài thi cần chấm (Writing)</h3>
-                    <div id="teacher-exam-grading-list"></div>
-                </div>
-
-                <!-- TEACHER: EXAM BUILDER -->
-                <div id="view-teacher-exam-builder" class="view-section hidden">
-                    <button onclick="navigate('teacher-exam-manage')" class="btn btn-outline" style="margin-bottom:10px;">&larr; Quay lại</button>
-                    <h2 class="section-title">Tạo Đề Thi Mới</h2>
-                    <div class="card">
-                        <form id="exam-builder-form">
-                            <div class="input-group"><label>Tên bài thi</label><input type="text" id="exam-title" class="input-field" required></div>
-                            <div class="input-group"><label>Thời gian làm bài (phút)</label><input type="number" id="exam-duration" class="input-field" required value="45"></div>
-                            <h4 style="margin-top:20px;">Chọn Câu hỏi Trắc nghiệm</h4>
-                            <div class="exam-builder-list" id="builder-quiz-list"><p>Đang tải...</p></div>
-                            <h4 style="margin-top:20px;">Chọn Đề bài Writing</h4>
-                            <div class="exam-builder-list" id="builder-writing-list"><p>Đang tải...</p></div>
-                            <button type="submit" class="btn btn-primary" style="margin-top:20px;">Lưu Đề Thi</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- STUDENT LESSON LIST (Searchable) -->
-                <div id="view-student-lessons" class="view-section">
-                     <div class="hero-section">
-                        <div class="hero-left" style="z-index:2;">
-                            <h2 style="font-size:2rem; margin-bottom:10px;">Xin chào!</h2>
-                            <p>Học tập hôm nay, dẫn đầu ngày mai.</p>
-                        </div>
-                        <div class="hero-right">
-                             <div class="hero-card" onclick="navigate('student-quiz')">
-                                 <i class="fa-solid fa-bolt" style="font-size:2rem; color:var(--primary-color); margin-bottom:10px;"></i>
-                                 <h3>Luyện tập</h3>
-                             </div>
-                             <div class="hero-card" onclick="navigate('student-exams')">
-                                 <i class="fa-solid fa-file-signature" style="font-size:2rem; color:#06b6d4; margin-bottom:10px;"></i>
-                                 <h3>Thi cử</h3>
-                             </div>
-                        </div>
-                    </div>
-                    <div class="search-bar-container">
-                        <input type="text" id="lesson-search" class="search-input" placeholder="Tìm kiếm bài học..." oninput="filterLessons()">
-                        <button class="btn btn-primary" onclick="filterLessons()"><i class="fa-solid fa-search"></i></button>
-                    </div>
-                    <h2 class="section-title" id="lesson-anchor">Danh sách bài học</h2>
-                    <div id="lesson-list" class="lesson-grid"></div>
-                </div>
-                
-                <!-- LESSON DETAIL (With Mark as Done) -->
-                <div id="view-lesson-detail" class="view-section hidden">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <button onclick="navigate('student-lessons')" class="btn btn-outline">&larr; Quay lại</button>
-                        <button id="btn-mark-done" class="btn btn-success" style="background:#10b981; color:white; border:none;" onclick="markLessonDone()"><i class="fa-solid fa-check"></i> Đánh dấu đã học</button>
-                    </div>
-                    <div class="card">
-                        <div id="detail-image" style="width:100%; height:300px; background-size:cover; background-position:center; border-radius:8px; margin-bottom:20px; display:none;"></div>
-                        <h1 id="detail-title" style="color: var(--primary-color); margin-bottom: 10px;">Unit Title</h1>
-                        <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 20px;"></div>
-                        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-language"></i> Vocabulary</h3>
-                        <div id="detail-vocab-container" style="margin-bottom: 20px;"></div>
-                        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-file-lines"></i> Content</h3>
-                        <div id="detail-content" style="line-height: 1.8; margin-bottom: 20px; white-space: pre-wrap;"></div>
-                        <div id="detail-video-container"></div>
-                    </div>
-                </div>
-
-                <!-- OTHER VIEWS (Standard) -->
-                <div id="view-student-writing" class="view-section hidden">
-                    <h2 class="section-title">Bài tập Viết (Writing)</h2>
-                    <div id="student-writing-list"></div>
-                </div>
-
-                <div id="view-teacher-writing-manage" class="view-section hidden">
-                    <h2 class="section-title">Quản lý Writing Assignment</h2>
-                    <div class="card">
-                        <h3>Tạo đề bài</h3>
-                        <form id="create-writing-form">
-                            <input type="text" id="writing-title" class="input-field" placeholder="Tiêu đề" required style="margin-bottom:10px;">
-                            <textarea id="writing-desc" class="input-field" placeholder="Mô tả yêu cầu..." required></textarea>
-                            <button type="submit" class="btn btn-primary" style="margin-top:10px;">Tạo đề</button>
-                        </form>
-                    </div>
-                    <h3>Bài làm cần chấm</h3>
-                    <div id="teacher-grading-list"></div>
-                </div>
-
-                <div id="view-teacher-grading-detail" class="view-section hidden">
-                     <button onclick="navigate('teacher-writing-manage')" class="btn btn-outline" style="margin-bottom: 20px;">&larr; Quay lại danh sách</button>
-                    <h2 class="section-title">Chấm bài</h2>
-                    <div class="card">
-                        <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--primary-color);">
-                            <h4 id="grade-assignment-title" style="margin-bottom: 5px;">Assignment Title</h4>
-                            <p id="grade-student-email" style="color: var(--text-light); font-style: italic;">Student Email</p>
-                        </div>
-                        <h4>Bài làm của sinh viên:</h4>
-                        <div id="grade-student-content" style="background: var(--bg-color); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; white-space: pre-wrap; min-height: 100px;"></div>
-                        <form id="grading-form">
-                            <div class="input-group"><label>Điểm số (0-100)</label><input type="number" id="grade-score" class="input-field" min="0" max="100" required></div>
-                            <div class="input-group"><label>Nhận xét (Feedback)</label><textarea id="grade-feedback" class="input-field" rows="3" placeholder="Nhận xét chi tiết..." required></textarea></div>
-                            <input type="hidden" id="grade-submission-id">
-                            <button type="submit" class="btn btn-primary">Hoàn tất chấm</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="view-leaderboard" class="view-section hidden">
-                    <h2 class="section-title">Bảng vàng Tổng hợp</h2>
-                    <div class="card">
-                        <table class="leaderboard-table">
-                            <thead><tr><th>Hạng</th><th>Sinh viên</th><th>Điểm Tổng</th></tr></thead>
-                            <tbody id="leaderboard-body"></tbody>
-                        </table>
-                        <p style="font-size:0.8rem; color:gray; margin-top:10px;">*Điểm Tổng = Quiz + Writing + Thi</p>
-                    </div>
-                </div>
-
-                 <!-- QUIZ GAME (Same) -->
-                <div id="view-student-quiz" class="view-section hidden">
-                    <h2 class="section-title">Mini Game: Thử thách kiến thức</h2>
-                    <div id="quiz-start-screen" class="card text-center" style="text-align: center;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3407/3407037.png" width="100" style="margin-bottom: 20px;">
-                        <h3>Sẵn sàng chưa?</h3>
-                        <button onclick="startQuiz()" class="btn btn-primary">Bắt đầu ngay</button>
-                    </div>
-                    <div id="quiz-play-screen" class="hidden quiz-container">
-                        <div class="card">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                                <span style="font-weight: bold;">Điểm: <span id="current-score" style="color: var(--primary-color);">0</span></span>
-                                <span>Câu hỏi: <span id="question-counter">1</span>/10</span>
-                            </div>
-                            <div class="progress-bar" style="width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-bottom: 20px;">
-                                <div id="quiz-progress" style="width: 0%; height: 100%; background: var(--success); border-radius: 3px;"></div>
-                            </div>
-                            <div id="question-text" class="question-box"></div>
-                            <div id="answers-area" class="options-grid"></div>
-                            <div id="feedback-msg" style="margin-top: 20px; font-weight: bold; height: 24px;"></div>
-                            <button id="btn-next-question" onclick="nextQuestion()" class="btn btn-primary hidden" style="margin-top: 20px;">Câu tiếp theo &rarr;</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-teacher-create-quiz" class="view-section hidden">
-                    <h2 class="section-title">Tạo Ngân hàng Câu hỏi</h2>
-                    <div class="card">
-                        <form id="create-quiz-form">
-                            <input type="text" id="quiz-question" class="input-field" placeholder="Câu hỏi" required style="margin-bottom:10px;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                                <input type="text" id="opt-a" class="input-field" placeholder="A" required>
-                                <input type="text" id="opt-b" class="input-field" placeholder="B" required>
-                                <input type="text" id="opt-c" class="input-field" placeholder="C" required>
-                                <input type="text" id="opt-d" class="input-field" placeholder="D" required>
-                            </div>
-                            <select id="correct-opt" class="input-field"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
-                            <button type="submit" class="btn btn-primary" style="margin-top:10px;">Lưu vào Ngân hàng</button>
-                        </form>
-                    </div>
-                </div>
-
-            </main>
-        </div>
-    </section>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDoc, getDocs, doc, setDoc, query, orderBy, limit, updateDoc, deleteDoc, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
+        // --- Firebase Config ---
         const firebaseConfig = {
-            apiKey: "AIzaSyBPAQ8jldVTwtB_uAzz0-oGcZiUaJ3NeyU",
-            authDomain: "ewmp-abc18.firebaseapp.com",
-            projectId: "ewmp-abc18",
-            storageBucket: "ewmp-abc18.firebasestorage.app",
-            messagingSenderId: "416084778745",
-            appId: "1:416084778745:web:edb8de27952c3007e24c28",
-            measurementId: "G-GVP2MCQNLJ"
+          apiKey: "AIzaSyA7A_VxnEqlYMebteU76Om0FnrkVH8Pdl4",
+          authDomain: "atgt-6c132.firebaseapp.com",
+          projectId: "atgt-6c132",
+          storageBucket: "atgt-6c132.firebasestorage.app",
+          messagingSenderId: "386224446840",
+          appId: "1:386224446840:web:1fbb428b3c4799260d7c8d",
+          measurementId: "G-D6EZ3CFQRF"
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const PUBLIC_DATA_PATH = `artifacts/${appId}/public/data`;
-        function getUserProfilePath(userId) { return `artifacts/${appId}/users/${userId}/profile`; }
+        // --- Constants ---
+        const MAP_LAYERS = [
+            { id: 'A', label: 'Trường TH Nam Hà', color: 'text-brand-blue', bg: 'bg-blue-100', icon: <MapPin className="w-4 h-4" /> },
+            { id: 'B', label: 'Tuyến đường HS đi', color: 'text-slate-600', bg: 'bg-slate-100', icon: <Navigation className="w-4 h-4" /> },
+            { id: 'C', label: 'Điểm Nguy cơ/Ùn tắc', color: 'text-red-500', bg: 'bg-red-100', icon: <AlertTriangle className="w-4 h-4" /> },
+            { id: 'D', label: 'Khu vực An toàn', color: 'text-traffic-green', bg: 'bg-green-100', icon: <Shield className="w-4 h-4" /> },
+            { id: 'E', label: 'Chốt trực (CA/Đoàn)', color: 'text-traffic-yellow', bg: 'bg-yellow-100', icon: <User className="w-4 h-4" /> },
+        ];
 
-        let currentUser = null;
-        let currentRole = 'student';
-        let selectedRoleAuth = 'student';
-        let examTimerInterval = null;
-        let currentExamData = null;
-        let currentExamQuestions = [];
-        let editingLessonId = null;
-        let currentViewingLessonId = null;
-        let allLessonsCache = []; // For search filtering
+        // --- Header ---
+        const Header = ({ setCurrentPage, user, onLogout }) => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const navItems = [
+                { id: 'home', label: 'Trang chủ', icon: <Star className="w-4 h-4"/>, color: 'hover:bg-traffic-green' },
+                { id: 'news', label: 'Tin tức', icon: <Megaphone className="w-4 h-4"/>, color: 'hover:bg-brand-blue' },
+                { id: 'skills', label: 'Kỹ năng', icon: <BookOpen className="w-4 h-4"/>, color: 'hover:bg-traffic-yellow' },
+                { id: 'quiz', label: 'Đố vui', icon: <Award className="w-4 h-4"/>, color: 'hover:bg-traffic-red' }, 
+                { id: 'reporter', label: 'Phóng viên', icon: <Camera className="w-4 h-4"/>, color: 'hover:bg-purple-500' }, 
+                { id: 'map', label: 'Bản đồ', icon: <Map className="w-4 h-4"/>, color: 'hover:bg-traffic-dark' },
+            ];
 
-        const get = (id) => document.getElementById(id);
-        const show = (id) => get(id).classList.remove('hidden');
-        const hide = (id) => get(id).classList.add('hidden');
-        const toggleLoading = (isLoading) => get('loading-overlay').style.display = isLoading ? 'flex' : 'none';
-        const showToast = (msg) => {
-            const t = get('toast'); t.textContent = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-        
-        // --- THEME & UI LOGIC ---
-        window.toggleTheme = () => {
-            const html = document.documentElement;
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            const icon = document.querySelector('.theme-toggle i');
-            icon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        };
-
-        window.toggleSidebar = () => {
-            const sb = get('main-sidebar');
-            sb.classList.toggle('show');
-        };
-
-        window.scrollToLessons = () => {
-            const el = get('lesson-anchor');
-            if(el) el.scrollIntoView({behavior: 'smooth'});
-        }
-
-        window.addVocabRow = (word='', ipa='', mean='') => {
-            const container = get('vocab-input-container');
-            const div = document.createElement('div');
-            div.className = 'vocab-row-input';
-            div.innerHTML = `
-                <input type="text" class="input-field vocab-word" value="${word}" placeholder="Word">
-                <input type="text" class="input-field vocab-ipa" value="${ipa}" placeholder="IPA">
-                <input type="text" class="input-field vocab-mean" value="${mean}" placeholder="Meaning">
-                <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
-            `;
-            container.appendChild(div);
-        }
-        window.addEventListener('DOMContentLoaded', () => { addVocabRow(); });
-
-        // --- NAVIGATION & AUTH ---
-        window.switchAuthRole = (role) => {
-            selectedRoleAuth = role;
-            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        window.navigate = (viewId) => {
-            // Mobile sidebar handling
-            if(window.innerWidth <= 768) get('main-sidebar').classList.remove('show');
-
-            if(viewId === 'student-exam-room') {
-                document.querySelector('.sidebar').classList.add('hidden');
-                document.querySelector('.navbar').classList.add('hidden');
-                document.querySelector('.main-grid').style.display = 'block';
-            } else {
-                if (currentRole === 'student') show('student-menu');
-                if (currentRole === 'teacher') show('teacher-menu');
-                document.querySelector('.sidebar').classList.remove('hidden');
-                document.querySelector('.navbar').classList.remove('hidden');
-                document.querySelector('.main-grid').style.display = 'grid';
-            }
-
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            hide('view-student-exam-room');
-
-            // Routing
-            if (viewId === 'student-lessons') { show('view-student-lessons'); fetchLessons(); }
-            else if (viewId === 'student-writing') { show('view-student-writing'); fetchStudentWriting(); }
-            else if (viewId === 'teacher-writing-manage') { show('view-teacher-writing-manage'); fetchTeacherPendingSubmissions(); }
-            else if (viewId === 'teacher-exam-manage') { show('view-teacher-exam-manage'); fetchTeacherExams(); }
-            else if (viewId === 'teacher-exam-builder') { show('view-teacher-exam-builder'); loadExamBuilderData(); }
-            else if (viewId === 'student-exams') { show('view-student-exams'); fetchStudentExams(); }
-            else if (viewId === 'leaderboard') { show('view-leaderboard'); fetchLeaderboard(); }
-            else if (viewId === 'teacher-create-quiz') { show('view-teacher-create-quiz'); }
-            else if (viewId === 'teacher-create-lesson') { resetLessonForm(); show('view-teacher-create-lesson'); }
-            else if (viewId === 'teacher-lesson-manage') { show('view-teacher-lesson-manage'); fetchTeacherLessonList(); }
-            else {
-                 try { show(`view-${viewId}`); } catch(e) {}
-            }
-            
-            const activeMenu = document.querySelector(`.menu-item[onclick="navigate('${viewId}')"]`);
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            if (activeMenu) activeMenu.classList.add('active');
-        }
-        
-        onAuthStateChanged(auth, async (user) => {
-            toggleLoading(true);
-            if (user) {
-                currentUser = user;
-                try {
-                    const userDoc = await getDoc(doc(db, getUserProfilePath(user.uid), "info"));
-                    currentRole = userDoc.exists() ? userDoc.data().role : 'student';
-                    setupDashboard(user, currentRole);
-                } catch (e) { currentRole = 'student'; setupDashboard(user, 'student'); }
-            } else { show('auth-screen'); hide('app-dashboard'); }
-            toggleLoading(false);
-        });
-
-        function setupDashboard(user, role) {
-            hide('auth-screen'); show('app-dashboard');
-            get('user-email').textContent = user.email;
-            get('user-badge').textContent = role === 'teacher' ? 'Giáo viên' : 'Sinh viên';
-            if (role === 'teacher') { 
-                show('teacher-menu'); hide('student-menu'); 
-                show('teacher-stats-section'); // Show stats for teacher
-                fetchTeacherStats();
-                window.navigate('teacher-lesson-manage'); 
-            } else { 
-                show('student-menu'); hide('teacher-menu'); 
-                hide('teacher-stats-section');
-                window.navigate('student-lessons'); 
-            }
-        }
-        
-        // --- TEACHER STATS ---
-        async function fetchTeacherStats() {
-            try {
-                const lessonSnap = await getDocs(collection(db, PUBLIC_DATA_PATH, 'lessons'));
-                const examSnap = await getDocs(collection(db, PUBLIC_DATA_PATH, 'exams'));
-                const pendingSnap = await getDocs(query(collection(db, PUBLIC_DATA_PATH, "writing_submissions"), where("status", "==", "pending")));
-                
-                get('stat-lessons').textContent = lessonSnap.size;
-                get('stat-exams').textContent = examSnap.size;
-                get('stat-pending').textContent = pendingSnap.size;
-            } catch(e) { console.log("Stats error", e); }
-        }
-
-        // --- TEACHER: LESSON MANAGEMENT (Table) ---
-        async function fetchTeacherLessonList() {
-            toggleLoading(true);
-            const tbody = get('teacher-lesson-table-body'); tbody.innerHTML = '';
-            try {
-                const q = query(collection(db, PUBLIC_DATA_PATH, 'lessons'), orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
-                if(snap.empty) {
-                     get('teacher-no-lessons-msg').style.display = 'block';
-                } else {
-                     get('teacher-no-lessons-msg').style.display = 'none';
-                     snap.forEach(doc => {
-                         const d = doc.data();
-                         const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
-                         const img = d.image ? `<img src="${d.image}" class="manage-thumb">` : '<div class="manage-thumb" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-book"></i></div>';
-                         
-                         tbody.innerHTML += `
-                            <tr>
-                                <td>${img}</td>
-                                <td><div style="font-weight:bold;">${d.title}</div><div style="color:var(--text-light);font-size:0.85rem;">${d.desc}</div></td>
-                                <td>${date}</td>
-                                <td>
-                                    <div class="manage-actions">
-                                        <button class="btn btn-warning btn-sm" onclick="editLesson('${doc.id}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteLesson('${doc.id}')"><i class="fa-solid fa-trash"></i> Xóa</button>
-                                    </div>
-                                </td>
-                            </tr>
-                         `;
-                     });
-                }
-            } catch(e) { console.error(e); showToast("Lỗi tải danh sách bài giảng"); }
-            toggleLoading(false);
-        }
-
-        // --- LESSON LOGIC (STUDENT & TEACHER) ---
-        async function fetchLessons() {
-             toggleLoading(true);
-             const list = get('lesson-list'); list.innerHTML = '';
-             try {
-                 // Fetch user progress
-                 let completedLessons = [];
-                 if(currentRole === 'student' && currentUser) {
-                    const progDoc = await getDoc(doc(db, PUBLIC_DATA_PATH, `progress/${currentUser.uid}`));
-                    if(progDoc.exists()) completedLessons = progDoc.data().completed || [];
-                 }
-
-                 const q = query(collection(db, PUBLIC_DATA_PATH, 'lessons'), orderBy('createdAt', 'desc'));
-                 const snap = await getDocs(q);
-                 allLessonsCache = []; // cache for search
-                 snap.forEach(doc => {
-                     const d = doc.data();
-                     allLessonsCache.push({id: doc.id, ...d, completed: completedLessons.includes(doc.id)});
-                 });
-                 renderLessons(allLessonsCache);
-             } catch(e) { console.error(e); }
-             toggleLoading(false);
-        }
-
-        function renderLessons(lessons) {
-            const list = get('lesson-list'); list.innerHTML = '';
-            if(lessons.length === 0) { list.innerHTML = '<p>Không tìm thấy bài học.</p>'; return; }
-            
-            lessons.forEach(d => {
-                 const imgStyle = d.image ? `background-image: url('${d.image}');` : '';
-                 const imgClass = d.image ? 'lesson-img' : 'lesson-img no-image';
-                 const imgContent = d.image ? '' : '<i class="fa-solid fa-book"></i>';
-                 const completedBadge = d.completed ? '<div class="completion-badge"><i class="fa-solid fa-check"></i> Đã học</div>' : '';
-                 
-                 // In Student View, we DON'T show Teacher Controls anymore (Teacher has dedicated view)
-                 
-                 list.innerHTML += `
-                    <div class="lesson-card">
-                        ${completedBadge}
-                        <div class="${imgClass}" style="${imgStyle}">${imgContent}</div>
-                        <div class="lesson-body">
-                            <div class="lesson-title">${d.title}</div>
-                            <div class="lesson-desc">${d.desc}</div>
-                            <button class="btn btn-outline" style="width:100%" onclick="openLesson('${d.id}')">Học ngay</button>
+            return (
+                <header className="bg-white border-b-4 border-traffic-dark sticky top-0 z-50">
+                    <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+                        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setCurrentPage('home')}>
+                            <div className="relative">
+                                <div className="w-12 h-12 bg-traffic-dark rounded-xl flex items-center justify-center border-2 border-white shadow-lg group-hover:rotate-12 transition-transform">
+                                    <Shield className="text-traffic-yellow w-8 h-8" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-traffic-red rounded-full border-2 border-white animate-pulse"></div>
+                            </div>
+                            <div>
+                                <h1 className="font-display font-black text-xl md:text-2xl text-traffic-dark uppercase tracking-tight leading-none">Biệt Đội <span className="text-traffic-green">Giao Thông</span></h1>
+                                <p className="text-xs font-bold text-slate-400 bg-slate-100 inline-block px-2 py-0.5 rounded-full mt-1">Trường TH Nam Hà</p>
+                            </div>
                         </div>
-                    </div>`;
-            });
-        }
 
-        window.filterLessons = () => {
-            const term = get('lesson-search').value.toLowerCase();
-            const filtered = allLessonsCache.filter(l => l.title.toLowerCase().includes(term) || l.desc.toLowerCase().includes(term));
-            renderLessons(filtered);
-        }
+                        <nav className="hidden xl:flex items-center gap-2">
+                            {navItems.map(item => (
+                                <button key={item.id} onClick={() => setCurrentPage(item.id)} className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-slate-600 transition-all hover:text-white btn-cartoon shadow-cartoon hover:shadow-cartoon-hover ${item.color}`}>
+                                    {item.label}
+                                </button>
+                            ))}
+                            {user ? (
+                                <button onClick={() => setCurrentPage('admin')} className="ml-4 bg-traffic-red text-white px-5 py-2 rounded-full font-bold shadow-cartoon btn-cartoon flex items-center gap-2">
+                                    <User className="w-4 h-4"/> Admin
+                                </button>
+                            ) : (
+                                <button onClick={() => setCurrentPage('login')} className="ml-4 bg-traffic-yellow text-traffic-dark px-5 py-2 rounded-full font-black shadow-cartoon btn-cartoon flex items-center gap-2 border-2 border-traffic-dark">
+                                    <LogIn className="w-4 h-4" /> Đăng nhập
+                                </button>
+                            )}
+                        </nav>
+                        <button className="xl:hidden p-2 bg-slate-100 rounded-lg" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button>
+                    </div>
+                    {isMenuOpen && (
+                        <div className="xl:hidden bg-white border-t-2 border-slate-100 p-4 absolute w-full shadow-xl">
+                            <div className="grid grid-cols-2 gap-3">
+                                {navItems.map(item => (<button key={item.id} onClick={() => { setCurrentPage(item.id); setIsMenuOpen(false); }} className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl hover:bg-slate-100 font-bold text-slate-700"><div className={`p-2 rounded-full text-white mb-2 ${item.color.replace('hover:', '')}`}>{item.icon}</div>{item.label}</button>))}
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-dashed">
+                                {user ? <button onClick={() => setCurrentPage('admin')} className="w-full bg-red-100 text-red-600 py-3 rounded-xl font-bold">Trang Quản trị</button> : <button onClick={() => {setCurrentPage('login'); setIsMenuOpen(false);}} className="w-full bg-traffic-yellow text-traffic-dark py-3 rounded-xl font-bold shadow-cartoon btn-cartoon">Đăng nhập Quản trị</button>}
+                            </div>
+                        </div>
+                    )}
+                </header>
+            );
+        };
 
-        window.openLesson = async (lessonId) => {
-            toggleLoading(true);
-            try {
-                const docSnap = await getDoc(doc(db, PUBLIC_DATA_PATH, "lessons", lessonId));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    currentViewingLessonId = lessonId;
-                    hide('view-student-lessons'); show('view-lesson-detail');
-                    get('detail-title').textContent = data.title;
-                    get('detail-content').textContent = data.content;
-                    
-                    // Check done button state
-                    if(allLessonsCache.find(l => l.id === lessonId)?.completed) {
-                        get('btn-mark-done').innerHTML = '<i class="fa-solid fa-check"></i> Đã hoàn thành';
-                        get('btn-mark-done').classList.add('disabled');
-                    } else {
-                        get('btn-mark-done').innerHTML = '<i class="fa-solid fa-check"></i> Đánh dấu đã học';
-                        get('btn-mark-done').classList.remove('disabled');
+        // --- Simple Rich Text Editor ---
+        const SimpleRichTextEditor = ({ value, onChange }) => {
+            const editorRef = useRef(null);
+            useEffect(() => { if (editorRef.current && editorRef.current.innerHTML !== value) editorRef.current.innerHTML = value || ''; }, [value]);
+            const execCmd = (command, val = null) => { document.execCommand(command, false, val); editorRef.current.focus(); };
+            return (
+                <div className="border-2 border-slate-200 rounded-xl bg-white overflow-hidden">
+                    <div className="flex gap-1 p-2 bg-slate-50 border-b border-slate-200">
+                        {['bold', 'italic', 'underline'].map(cmd => (
+                            <button key={cmd} type="button" onClick={() => execCmd(cmd)} className="p-2 hover:bg-white rounded font-bold capitalize">{cmd[0]}</button>
+                        ))}
+                    </div>
+                    <div ref={editorRef} contentEditable suppressContentEditableWarning={true} className="p-4 min-h-[150px] focus:outline-none rte-content" onInput={() => onChange(editorRef.current.innerHTML)}></div>
+                </div>
+            );
+        };
+
+        // --- Leaflet Map Component ---
+        const LeafletMap = ({ markers, activeLayers, onMapClick, drawingData, userLocation }) => {
+            const mapContainerRef = useRef(null);
+            const mapInstanceRef = useRef(null);
+            const layersRef = useRef([]);
+            const drawingLayerRef = useRef(null);
+            const userLocationMarkerRef = useRef(null);
+
+            useEffect(() => { 
+                if (window.L && !mapInstanceRef.current) initMap(); 
+                return () => { if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; } };
+            }, []);
+
+            const initMap = () => {
+                if (!mapContainerRef.current || window.L === undefined) return;
+                const map = window.L.map(mapContainerRef.current).setView([18.336241, 105.902037], 16);
+                window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+                mapInstanceRef.current = map;
+                updateLayers(map);
+            };
+
+            // Drawing logic
+            useEffect(() => {
+                if (!mapInstanceRef.current || !window.L) return;
+                const map = mapInstanceRef.current;
+                if (drawingLayerRef.current) drawingLayerRef.current.forEach(l => { try { map.removeLayer(l); } catch(e) {} });
+                drawingLayerRef.current = [];
+                if (!drawingData) return;
+                const { type, points } = drawingData;
+                if (points && points.length > 0 && points.every(p => !isNaN(p[0]) && !isNaN(p[1]))) {
+                    points.forEach(pt => {
+                        const m = window.L.marker(pt, { icon: window.L.divIcon({ className: 'custom-div-icon', html: `<div style="background-color: #ec4899; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>` }) }).addTo(map);
+                        drawingLayerRef.current.push(m);
+                    });
+                    if (points.length > 1) {
+                        const shape = type === 'polyline' ? window.L.polyline(points, { color: '#ec4899', dashArray: '5, 10', weight: 3 }) : window.L.polygon(points, { color: '#ec4899', dashArray: '5, 10', weight: 3, fillOpacity: 0.2 });
+                        shape.addTo(map);
+                        drawingLayerRef.current.push(shape);
                     }
-
-                    if (data.image) {
-                        get('detail-image').style.display = 'block';
-                        get('detail-image').style.backgroundImage = `url('${data.image}')`;
-                    } else { get('detail-image').style.display = 'none'; }
-                    
-                    let vocabHtml = '';
-                    if (Array.isArray(data.vocabList) && data.vocabList.length > 0) {
-                        vocabHtml = `<table class="vocab-table"><thead><tr><th>Word</th><th>Pronunciation</th><th>Meaning</th></tr></thead><tbody>${data.vocabList.map(v => `<tr><td><b>${v.word}</b></td><td>${v.ipa || ''}</td><td>${v.meaning || ''}</td></tr>`).join('')}</tbody></table>`;
-                    } else if (data.vocab) {
-                        vocabHtml = data.vocab.split('\n').map(line => `<div style="padding:5px 0; border-bottom:1px dashed var(--border-color)">${line}</div>`).join('');
-                    } else { vocabHtml = '<p>Không có từ vựng.</p>'; }
-                    get('detail-vocab-container').innerHTML = vocabHtml;
-                    
-                    if(data.video) get('detail-video-container').innerHTML = `<iframe width="100%" height="400" src="${data.video}" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>`;
-                    else get('detail-video-container').innerHTML = '';
                 }
-            } catch (err) { showToast("Lỗi tải bài học"); }
-            toggleLoading(false);
-        }
+            }, [drawingData]);
 
-        window.markLessonDone = async () => {
-            if(!currentUser || !currentViewingLessonId) return;
-            toggleLoading(true);
-            try {
-                 const progRef = doc(db, PUBLIC_DATA_PATH, `progress/${currentUser.uid}`);
-                 const progDoc = await getDoc(progRef);
-                 let completed = [];
-                 if(progDoc.exists()) completed = progDoc.data().completed || [];
-                 
-                 if(!completed.includes(currentViewingLessonId)) {
-                     completed.push(currentViewingLessonId);
-                     await setDoc(progRef, { completed: completed }, { merge: true });
-                     showToast("Đã đánh dấu hoàn thành!");
-                     get('btn-mark-done').innerHTML = '<i class="fa-solid fa-check"></i> Đã hoàn thành';
-                     // Update local cache
-                     const idx = allLessonsCache.findIndex(l => l.id === currentViewingLessonId);
-                     if(idx > -1) allLessonsCache[idx].completed = true;
-                 } else {
-                     showToast("Bạn đã hoàn thành bài này rồi.");
-                 }
-            } catch(e) { showToast("Lỗi lưu tiến độ"); }
-            toggleLoading(false);
-        }
+            // Click Handler
+            useEffect(() => {
+                if (!mapInstanceRef.current) return;
+                const map = mapInstanceRef.current;
+                const clickHandler = (e) => { if (onMapClick) onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng }); };
+                if (onMapClick) { map.getContainer().classList.add('cursor-crosshair'); map.on('click', clickHandler); }
+                else { map.getContainer().classList.remove('cursor-crosshair'); map.off('click', clickHandler); }
+                return () => { map.off('click', clickHandler); };
+            }, [onMapClick]);
 
-        // --- AUTH & GLOBAL HELPERS ---
-        get('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            toggleLoading(true);
-            try { await signInWithEmailAndPassword(auth, get('email').value, get('password').value); showToast("Đăng nhập thành công"); } 
-            catch (err) { showToast(err.message); }
-            toggleLoading(false);
-        });
-        get('btn-signup').addEventListener('click', async () => {
-            toggleLoading(true);
-            try {
-                const uc = await createUserWithEmailAndPassword(auth, get('email').value, get('password').value);
-                await setDoc(doc(db, getUserProfilePath(uc.user.uid), "info"), { email: get('email').value, role: selectedRoleAuth });
-                showToast("Đăng ký thành công!");
-            } catch (err) { showToast(err.message); toggleLoading(false); }
-        });
-        window.handleLogout = () => signOut(auth).then(() => location.reload());
+            // User Location
+            useEffect(() => {
+                if (!mapInstanceRef.current || !window.L || !userLocation) return;
+                const map = mapInstanceRef.current;
+                if (!userLocationMarkerRef.current) {
+                    const userIcon = window.L.divIcon({ className: 'custom-div-icon', html: '<div class="user-location-icon" style="width: 24px; height: 24px;"></div>', iconSize: [24, 24], iconAnchor: [12, 12] });
+                    userLocationMarkerRef.current = window.L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map).bindPopup("Vị trí của bạn");
+                } else { userLocationMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]); }
+                map.setView([userLocation.lat, userLocation.lng], 16);
+            }, [userLocation]);
 
-        // --- WRITING & GRADING ---
-        async function fetchTeacherPendingSubmissions() {
-             const container = get('teacher-grading-list'); container.innerHTML='';
-             const q = query(collection(db, PUBLIC_DATA_PATH, "writing_submissions"), where("status", "==", "pending"));
-             const s = await getDocs(q);
-             if(s.empty) container.innerHTML='<p>Không có bài tập viết nào cần chấm.</p>';
-             s.forEach(doc=>{
-                 const d=doc.data();
-                 container.innerHTML+=`<div class="writing-item"><div class="writing-header"><b>${d.assignmentTitle}</b></div><div>User: ${d.studentEmail}</div><button class="btn btn-primary btn-sm" onclick="openGrading('${doc.id}')">Chấm bài</button></div>`
-             });
-        }
-        window.openGrading = async (submissionId) => {
-            toggleLoading(true);
-            try {
-                const docSnap = await getDoc(doc(db, PUBLIC_DATA_PATH, "writing_submissions", submissionId));
-                if(docSnap.exists()) {
-                    const data = docSnap.data();
-                    hide('view-teacher-writing-manage');
-                    show('view-teacher-grading-detail');
-                    get('grade-assignment-title').textContent = data.assignmentTitle;
-                    get('grade-student-email').textContent = data.studentEmail;
-                    get('grade-student-content').textContent = data.content;
-                    get('grade-submission-id').value = submissionId;
-                    get('grading-form').reset();
-                }
-            } catch(e) { showToast("Lỗi mở bài làm"); }
-            toggleLoading(false);
-        }
-        get('grading-form').addEventListener('submit', async(e) => {
-            e.preventDefault(); toggleLoading(true);
-            const subId = get('grade-submission-id').value;
-            const score = parseInt(get('grade-score').value);
-            const feedback = get('grade-feedback').value;
-            try {
-                await updateDoc(doc(db, PUBLIC_DATA_PATH, "writing_submissions", subId), {score, feedback, status: 'graded', gradedAt: new Date()});
-                showToast("Đã chấm điểm xong!"); navigate('teacher-writing-manage');
-            } catch(e) { showToast("Lỗi lưu điểm: " + e.message); }
-            toggleLoading(false);
-        });
+            // Markers Update
+            useEffect(() => { if (mapInstanceRef.current && window.L) updateLayers(mapInstanceRef.current); }, [markers, activeLayers]);
 
-        async function fetchStudentWriting() {
-            const c = get('student-writing-list'); c.innerHTML='';
-            // (Simplified for demo: fetch all assignments + user submissions)
-            const assignSnap = await getDocs(query(collection(db, PUBLIC_DATA_PATH, "writing_assignments"), orderBy("createdAt", "desc")));
-            const mySubSnap = await getDocs(query(collection(db, PUBLIC_DATA_PATH, "writing_submissions"), where("studentId", "==", currentUser.uid)));
-            const mySubs = {}; mySubSnap.forEach(doc => mySubs[doc.data().assignmentId] = doc.data());
-
-            if(assignSnap.empty) c.innerHTML='<p>Chưa có bài tập.</p>';
-            assignSnap.forEach(doc=>{
-                 const a=doc.data();
-                 const s=mySubs[doc.id];
-                 let html = `<div class="writing-item">
-                    <div style="display:flex;justify-content:space-between"><b>${a.title}</b> ${s ? (s.status==='graded'?'<span class="badge badge-graded">Đã chấm</span>':'<span class="badge badge-pending">Chờ chấm</span>') : '<span class="badge badge-closed">Chưa nộp</span>'}</div>
-                    <p>${a.description}</p>`;
-                 if(!s) {
-                     html += `<div class="submission-box"><textarea id="sub-${doc.id}" class="input-field" rows="3" placeholder="Bài làm..."></textarea><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="submitWriting('${doc.id}','${a.title}')">Nộp</button></div>`;
-                 } else {
-                     html += `<div class="submission-box"><p><b>Bài làm:</b> ${s.content}</p></div>`;
-                     if(s.status==='graded') html+=`<div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px; margin-top:10px; border:1px solid var(--success); color:var(--success)"><b>Điểm: ${s.score}</b><br>Feedback: ${s.feedback}</div>`;
-                 }
-                 html+='</div>';
-                 c.innerHTML+=html;
-            });
-        }
-        window.submitWriting = async (aid, atitle) => {
-            const content = get(`sub-${aid}`).value;
-            if(!content) return showToast("Nhập nội dung!");
-            toggleLoading(true);
-            try {
-                await addDoc(collection(db, PUBLIC_DATA_PATH, "writing_submissions"), {
-                    assignmentId: aid, assignmentTitle: atitle, studentId: currentUser.uid, studentEmail: currentUser.email, content, score: null, feedback: '', status: 'pending', createdAt: new Date()
+            const updateLayers = (map) => {
+                layersRef.current.forEach(layer => { try { map.removeLayer(layer); } catch(e) {} });
+                layersRef.current = [];
+                markers.forEach(feature => {
+                    if (activeLayers.includes(feature.type) && feature.isVisible !== false) {
+                        try {
+                            if (!feature.geometryType || feature.geometryType === 'point') {
+                                const m = window.L.marker([feature.lat, feature.lng], { icon: window.L.divIcon({ className: 'custom-div-icon', html: `<div style="background-color:${feature.type === 'C' ? '#FF5252' : (feature.type === 'E' ? '#FFD740' : '#448AFF')}; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>` }) }).bindPopup(feature.label).addTo(map);
+                                layersRef.current.push(m);
+                            } else if (feature.geometryType === 'polygon' && feature.coordinates) {
+                                const p = window.L.polygon(feature.coordinates, { color: '#00E676', fillColor: '#69F0AE', fillOpacity: 0.4, weight: 3 }).bindPopup(feature.label).addTo(map);
+                                layersRef.current.push(p);
+                            } else if (feature.geometryType === 'polyline' && feature.coordinates) {
+                                const l = window.L.polyline(feature.coordinates, { color: '#2C3E50', weight: 5, dashArray: '10, 10', opacity: 0.8 }).bindPopup(feature.label).addTo(map);
+                                layersRef.current.push(l);
+                            }
+                        } catch(e) { }
+                    }
                 });
-                showToast("Nộp bài thành công"); fetchStudentWriting();
-            } catch(e){ showToast(e.message); }
-            toggleLoading(false);
-        }
+            };
+            return <div ref={mapContainerRef} className="w-full h-full z-0" />;
+        };
 
-        // --- CRUD FUNCTIONS (Expanded) ---
-        window.resetLessonForm = () => { editingLessonId = null; get('create-lesson-form').reset(); get('form-title').textContent="Soạn bài mới"; get('form-submit-btn').textContent="Đăng bài"; get('vocab-input-container').innerHTML=''; addVocabRow(); }
-        window.cancelEdit = () => { resetLessonForm(); navigate('teacher-lesson-manage'); }
-        
-        window.deleteLesson = async (id) => { 
-            if(confirm("Bạn có chắc chắn muốn xóa bài giảng này không?")) { 
-                toggleLoading(true);
+        // --- Interactive Map Container ---
+        const InteractiveMap = ({ isAdmin, onMapClick, drawingData }) => {
+            const [activeLayers, setActiveLayers] = useState(['A', 'B', 'C', 'D', 'E']);
+            const [markers, setMarkers] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [userLocation, setUserLocation] = useState(null);
+
+            useEffect(() => {
+                if (!db) { setLoading(false); return; }
+                const q = query(collection(db, 'map_markers'));
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setMarkers(data.length ? data : []);
+                    setLoading(false);
+                }, () => setLoading(false));
+                return () => unsubscribe();
+            }, []);
+
+            const toggleLayer = (id) => activeLayers.includes(id) ? setActiveLayers(activeLayers.filter(l => l !== id)) : setActiveLayers([...activeLayers, id]);
+            
+            const locateUser = () => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => { setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude }); },
+                        () => alert("Không thể lấy vị trí."), { enableHighAccuracy: true }
+                    );
+                } else alert("Trình duyệt không hỗ trợ.");
+            };
+
+            return (
+                <div className="bg-white p-6 rounded-3xl shadow-cartoon border-4 border-slate-200">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <div>
+                            <h2 className="font-display text-2xl font-black text-slate-800 flex items-center gap-2">
+                                <span className="bg-blue-100 p-2 rounded-xl text-brand-blue"><Map className="w-6 h-6" /></span> Bản đồ Giao thông số
+                            </h2>
+                            <p className="text-sm font-bold text-slate-400 mt-1 ml-1">Dữ liệu thực tế khu vực Phường Thành Sen</p>
+                        </div>
+                        <div className="flex flex-wrap gap-3 items-center">
+                            {isAdmin && <span className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-black flex items-center border-2 border-yellow-200 animate-pulse"><MousePointer2 className="w-3 h-3 mr-1"/> Click bản đồ để chọn</span>}
+                            <button onClick={locateUser} className="bg-sky-100 text-brand-blue px-4 py-2 rounded-full hover:bg-sky-200 font-bold flex items-center gap-2 btn-cartoon border-2 border-sky-200" title="Vị trí của tôi"><LocateFixed className="w-4 h-4"/> Vị trí của tôi</button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div className="lg:col-span-1 space-y-3 bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 h-fit">
+                            <h3 className="font-display font-bold text-slate-700 mb-3 flex items-center gap-2"><Layers className="w-4 h-4"/> Lớp dữ liệu</h3>
+                            {MAP_LAYERS.map(layer => (
+                                <div key={layer.id} className={`flex items-center gap-3 cursor-pointer group p-3 rounded-xl transition-all border-2 ${activeLayers.includes(layer.id) ? 'bg-white border-brand-blue shadow-sm' : 'border-transparent hover:bg-white'}`} onClick={() => toggleLayer(layer.id)}>
+                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${activeLayers.includes(layer.id) ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-400'}`}>
+                                        {activeLayers.includes(layer.id) && <CheckSquare className="w-3.5 h-3.5" />}
+                                    </div>
+                                    <span className={`text-sm font-bold flex items-center gap-2 ${layer.color}`}>{layer.icon} {layer.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="lg:col-span-3 bg-indigo-50 h-[500px] rounded-2xl border-4 border-slate-200 shadow-inner relative overflow-hidden group z-0">
+                            {loading ? <div className="absolute inset-0 flex items-center justify-center font-bold text-brand-blue animate-pulse">Đang tải bản đồ...</div> : <LeafletMap markers={markers} activeLayers={activeLayers} onMapClick={onMapClick} drawingData={drawingData} userLocation={userLocation} />}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Admin Dashboard (TÍCH HỢP ĐẦY ĐỦ TÍNH NĂNG NHƯ FILE GỐC) ---
+        const AdminDashboard = ({ onLogout }) => {
+            const [activeTab, setActiveTab] = useState('news'); 
+            const [title, setTitle] = useState('');
+            const [content, setContent] = useState('');
+            const [category, setCategory] = useState('Tin tức');
+            const [status, setStatus] = useState('');
+            const [editingId, setEditingId] = useState(null);
+            
+            // Map logic variables
+            const [geometryType, setGeometryType] = useState('point'); 
+            const [lat, setLat] = useState('');
+            const [lng, setLng] = useState('');
+            const [coordString, setCoordString] = useState('');
+            const [markerType, setMarkerType] = useState('C');
+            const [isVisible, setIsVisible] = useState(true); 
+
+            // Lists
+            const [adminPosts, setAdminPosts] = useState([]);
+            const [adminDocs, setAdminDocs] = useState([]);
+            const [mapItems, setMapItems] = useState([]);
+            const [reports, setReports] = useState([]);
+
+            useEffect(() => {
+                let unsubscribe = () => {};
+                if (activeTab === 'news') { const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setAdminPosts(s.docs.map(d => ({id: d.id, ...d.data()})))); }
+                else if (activeTab === 'docs') { const q = query(collection(db, 'documents'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setAdminDocs(s.docs.map(d => ({id: d.id, ...d.data()})))); }
+                else if (activeTab === 'map') { const q = query(collection(db, 'map_markers'), orderBy('createdAt', 'desc')); unsubscribe = onSnapshot(q, (s) => setMapItems(s.docs.map(d => ({id: d.id, ...d.data()})))); }
+                else if (activeTab === 'reports') { const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setReports(s.docs.map(d => ({id: d.id, ...d.data()})))); }
+                return () => unsubscribe();
+            }, [activeTab]);
+
+            const resetForm = () => { setTitle(''); setContent(''); setCategory('Tin tức'); setLat(''); setLng(''); setCoordString(''); setIsVisible(true); setEditingId(null); };
+            
+            const handleEdit = (item) => {
+                setEditingId(item.id); setTitle(item.title || item.label); 
+                if (activeTab === 'map') {
+                    setMarkerType(item.type); setGeometryType(item.geometryType || 'point'); setIsVisible(item.isVisible !== false);
+                    if (item.geometryType === 'point' || !item.geometryType) { setLat(item.lat); setLng(item.lng); setCoordString(''); }
+                    else { setCoordString(item.coordinates.map(p => p.join(',')).join('; ')); setLat(''); setLng(''); }
+                } else { setContent(item.content); setCategory(item.category || 'Tin tức'); }
+            };
+
+            const handleMapClick = (coords) => {
+                if (activeTab !== 'map') return;
+                if (geometryType === 'point') { setLat(coords.lat.toFixed(6)); setLng(coords.lng.toFixed(6)); }
+                else { const pt = `${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`; setCoordString(prev => prev ? `${prev}; ${pt}` : pt); }
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault(); setStatus('Đang xử lý...');
                 try {
-                    await deleteDoc(doc(db, PUBLIC_DATA_PATH, "lessons", id)); 
-                    showToast("Đã xóa thành công");
-                    fetchTeacherLessonList(); // Refresh table
-                } catch(e) { showToast("Lỗi xóa: " + e.message); }
-                toggleLoading(false);
-            } 
+                    let col = activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : 'documents');
+                    let data = activeTab === 'map' ? { label: title, type: markerType, geometryType, isVisible } : { title, content, category };
+                    if (activeTab === 'map') {
+                        if (geometryType === 'point') { data.lat = parseFloat(lat); data.lng = parseFloat(lng); }
+                        else { data.coordinates = coordString.split(';').map(p => { const [la, lo] = p.trim().split(','); return [parseFloat(la), parseFloat(lo)]; }); }
+                    }
+                    if (!editingId) data.createdAt = serverTimestamp();
+                    editingId ? await updateDoc(doc(db, col, editingId), data) : await addDoc(collection(db, col), data);
+                    setStatus('Thành công!'); resetForm(); setTimeout(() => setStatus(''), 2000);
+                } catch (err) { setStatus('Lỗi: ' + err.message); }
+            };
+
+            const handleDelete = async (col, id) => { if(window.confirm("Bạn có chắc chắn muốn xóa?")) { await deleteDoc(doc(db, col, id)); } };
+            const handleUpdateReport = async (id, val) => { await updateDoc(doc(db, 'reports', id), { status: val }); };
+
+            const drawingData = useMemo(() => {
+                if (activeTab !== 'map') return null;
+                if (geometryType === 'point') return (lat && lng && !isNaN(lat) && !isNaN(lng)) ? { type: 'point', points: [[parseFloat(lat), parseFloat(lng)]] } : null;
+                if (!coordString) return null;
+                try {
+                    const points = coordString.split(';').map(p => { const [la, lo] = p.trim().split(','); return [parseFloat(la), parseFloat(lo)]; }).filter(p => !isNaN(p[0]) && !isNaN(p[1]));
+                    return { type: geometryType, points };
+                } catch(e) { return null; }
+            }, [activeTab, geometryType, lat, lng, coordString]);
+
+            return (
+                <div className="bg-white p-6 rounded-3xl border-4 border-slate-200 shadow-xl mt-6 animate-fade-in">
+                    <div className="flex justify-between items-center mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 className="font-display text-2xl font-black text-slate-800 flex items-center gap-2"><User className="w-8 h-8 bg-slate-800 text-white p-1 rounded-lg"/> Trung tâm Chỉ huy Admin</h2>
+                        <button onClick={onLogout} className="text-red-500 font-bold hover:bg-red-50 px-3 py-1 rounded">Đăng xuất</button>
+                    </div>
+                    
+                    <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                        <button onClick={() => {setActiveTab('news'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'news' ? 'bg-blue-100 border-blue-500 text-blue-700' : 'border-slate-200 text-slate-500'}`}>📰 Tin tức</button>
+                        <button onClick={() => {setActiveTab('docs'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'docs' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' : 'border-slate-200 text-slate-500'}`}>📂 Văn bản</button>
+                        <button onClick={() => {setActiveTab('map'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'map' ? 'bg-traffic-dark border-slate-800 text-white' : 'border-slate-200 text-slate-500'}`}>🗺️ Bản đồ (GIS)</button>
+                        <button onClick={() => {setActiveTab('reports'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'reports' ? 'bg-purple-100 border-purple-500 text-purple-700' : 'border-slate-200 text-slate-500'}`}>📡 Báo cáo Măng non</button>
+                    </div>
+
+                    {activeTab === 'reports' ? (
+                        <div className="space-y-4">
+                            {reports.map(item => (
+                                <div key={item.id} className="border-2 border-slate-100 rounded-2xl p-4 hover:border-purple-200 transition-colors flex flex-col md:flex-row gap-4">
+                                    {item.image && <img src={item.image} className="w-24 h-24 object-cover rounded-xl border-2 border-slate-200 bg-slate-100" alt="Evidence" />}
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1"><span className={`px-2 py-0.5 rounded text-xs font-black uppercase text-white ${item.urgency === 'high' ? 'bg-traffic-red' : item.urgency === 'medium' ? 'bg-traffic-yellow' : 'bg-traffic-green'}`}>{item.urgency === 'high' ? 'Nguy hiểm' : item.urgency === 'medium' ? 'Cần chú ý' : 'Bình thường'}</span><span className="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">{item.type}</span></div>
+                                                <h3 className="font-bold text-lg text-slate-800">{item.name} báo cáo</h3>
+                                                <p className="text-slate-600 mt-1">{item.content}</p>
+                                            </div>
+                                            <button onClick={() => handleDelete('reports', item.id)} className="text-slate-300 hover:text-red-500"><Trash2 className="w-5 h-5"/></button>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-2 bg-slate-50 p-2 rounded-lg w-fit"><span className="text-xs font-bold text-slate-400">Trạng thái:</span><select value={item.status || 'pending'} onChange={(e) => handleUpdateReport(item.id, e.target.value)} className="bg-white border border-slate-200 rounded px-2 py-1 text-sm font-bold outline-none cursor-pointer"><option value="pending">⏳ Đang chờ</option><option value="processing">🛠️ Đang xử lý</option><option value="done">✅ Đã xong</option></select></div>
+                                    </div>
+                                </div>
+                            ))}
+                            {reports.length === 0 && <p className="text-center text-slate-400 font-bold py-10">Chưa có báo cáo nào!</p>}
+                        </div>
+                    ) : (
+                        <div className="grid lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-1 space-y-4">
+                                <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
+                                    <h3 className="font-bold text-slate-700 mb-3">{editingId ? 'Sửa' : 'Thêm'} {activeTab === 'map' ? 'Điểm' : 'Tin/Văn bản'}</h3>
+                                    <div className="space-y-3">
+                                        <input required className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" placeholder="Tiêu đề / Tên điểm" value={title} onChange={e=>setTitle(e.target.value)}/>
+                                        
+                                        {activeTab === 'map' ? (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <select className="p-2 rounded-xl border-2 font-bold" value={geometryType} onChange={e=>{setGeometryType(e.target.value); setCoordString(''); setLat(''); setLng('');}}><option value="point">Điểm</option><option value="polyline">Đường</option><option value="polygon">Vùng</option></select>
+                                                    <select className="p-2 rounded-xl border-2 font-bold" value={markerType} onChange={e=>setMarkerType(e.target.value)}><option value="A">Trường</option><option value="B">Đường</option><option value="C">Nguy cơ</option><option value="D">An toàn</option><option value="E">Chốt trực</option></select>
+                                                </div>
+                                                {geometryType === 'point' ? (
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <input type="number" step="any" className="p-2 rounded-xl border-2 font-bold" placeholder="Vĩ độ" value={lat} onChange={e=>setLat(e.target.value)}/>
+                                                        <input type="number" step="any" className="p-2 rounded-xl border-2 font-bold" placeholder="Kinh độ" value={lng} onChange={e=>setLng(e.target.value)}/>
+                                                    </div>
+                                                ) : (
+                                                    <textarea className="w-full p-2 rounded-xl border-2 h-20 text-xs font-mono" placeholder="Click bản đồ để vẽ..." value={coordString} readOnly></textarea>
+                                                )}
+                                                <p className="text-xs text-brand-blue font-bold italic">💡 Tip: Click lên bản đồ bên phải để lấy tọa độ tự động.</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <select className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" value={category} onChange={e=>setCategory(e.target.value)}>
+                                                    {activeTab === 'news' ? <><option>Tin tức</option><option>Gương điển hình</option><option>Kỹ năng</option></> : <><option>Văn bản nội bộ</option><option>Văn bản pháp luật</option><option>Mẫu cam kết</option></>}
+                                                </select>
+                                                {activeTab === 'news' ? <SimpleRichTextEditor value={content} onChange={setContent} /> : <input className="w-full p-3 rounded-xl border-2 font-bold" placeholder="Link tải tài liệu" value={content} onChange={e=>setContent(e.target.value)}/>}
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2 mt-4">
+                                        <button className="flex-1 bg-brand-blue text-white py-2 rounded-xl font-bold shadow-cartoon btn-cartoon">{editingId ? 'Cập nhật' : 'Lưu lại'}</button>
+                                        {editingId && <button type="button" onClick={resetForm} className="px-4 bg-slate-200 rounded-xl font-bold">Hủy</button>}
+                                    </div>
+                                    {status && <p className="text-center text-sm font-bold text-green-600 mt-2">{status}</p>}
+                                </form>
+                                <div className="bg-white border-2 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                                    {(activeTab === 'map' ? mapItems : (activeTab === 'news' ? adminPosts : adminDocs)).map(item => (
+                                        <div key={item.id} className="p-3 border-b flex justify-between items-center text-sm hover:bg-slate-50">
+                                            <span className="font-bold truncate w-2/3">{item.title || item.label}</span>
+                                            <div className="flex gap-1">
+                                                <button onClick={() => handleEdit(item)} className="text-blue-500 p-1"><Edit size={16}/></button>
+                                                <button onClick={() => handleDelete(activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : 'documents'), item.id)} className="text-red-500 p-1"><Trash2 size={16}/></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="lg:col-span-2">
+                                {activeTab === 'map' ? (
+                                    <div className="h-[500px] bg-slate-100 rounded-2xl border-4 border-slate-200 overflow-hidden relative">
+                                        <InteractiveMap isAdmin={true} onMapClick={handleMapClick} drawingData={drawingData} />
+                                        <div className="absolute top-2 right-2 bg-white/90 p-2 rounded-lg text-xs font-bold shadow z-[1000]">Chế độ chỉnh sửa đang BẬT</div>
+                                    </div>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-bold">
+                                        Chọn "Bản đồ" để xem trước
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Little Reporter (Phóng viên Măng non) ---
+        const LittleReporter = () => {
+            const [name, setName] = useState('');
+            const [issueType, setIssueType] = useState('Hư hỏng cơ sở vật chất');
+            const [urgency, setUrgency] = useState('low'); 
+            const [imageLink, setImageLink] = useState('');
+            const [content, setContent] = useState('');
+            const [status, setStatus] = useState('');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus('sending');
+                try {
+                    await addDoc(collection(db, 'reports'), {
+                        name: name || 'Ẩn danh',
+                        type: issueType,
+                        urgency: urgency,
+                        image: imageLink,
+                        content,
+                        status: 'pending', 
+                        createdAt: serverTimestamp(),
+                    });
+                    setStatus('success'); setName(''); setContent(''); setImageLink('');
+                } catch (err) { setStatus('error'); }
+            };
+
+            const urgencyOptions = [
+                { val: 'low', label: 'Bình thường', color: 'bg-traffic-green', icon: '🟢' },
+                { val: 'medium', label: 'Cần chú ý', color: 'bg-traffic-yellow', icon: '🟡' },
+                { val: 'high', label: 'Nguy hiểm!', color: 'bg-traffic-red', icon: '🔴' }
+            ];
+
+            return (
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-white rounded-3xl p-8 border-4 border-purple-100 shadow-cartoon relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12"><Camera size={100} className="text-purple-600"/></div>
+                        <h2 className="font-display text-3xl font-black text-purple-600 mb-2 flex items-center gap-3"><span className="bg-purple-100 p-2 rounded-xl"><Camera/></span> Phóng viên Măng non</h2>
+                        <p className="text-slate-500 mb-6 font-semibold">Thấy điều gì chưa an toàn? Hãy báo ngay cho Biệt đội Giao thông nhé!</p>
+                        {status === 'success' ? (
+                            <div className="bg-green-50 p-8 rounded-2xl text-center border-2 border-green-200 animate-bounce">
+                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle className="w-10 h-10 text-green-600"/></div>
+                                <h3 className="font-display text-2xl font-bold text-green-700">Đã gửi tin!</h3>
+                                <p className="text-green-800">Cảm ơn bạn đã góp phần giúp trường an toàn hơn.</p>
+                                <button onClick={() => setStatus('')} className="mt-4 font-bold underline text-green-600">Gửi tin khác</button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label className="font-bold text-slate-700 block mb-1">Tên của bạn</label><input className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-purple-400 outline-none" placeholder="VD: Bé Bi lớp 3A" value={name} onChange={e=>setName(e.target.value)} /></div>
+                                    <div><label className="font-bold text-slate-700 block mb-1">Loại sự cố</label><select className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-purple-400 outline-none" value={issueType} onChange={e=>setIssueType(e.target.value)}><option>Biển báo hỏng/mờ</option><option>Hố gà/Đường xấu</option><option>Ùn tắc giao thông</option><option>Đi xe không mũ bảo hiểm</option><option>Khác</option></select></div>
+                                </div>
+                                <div><label className="font-bold text-slate-700 block mb-2">Mức độ khẩn cấp</label><div className="flex gap-2">{urgencyOptions.map(opt => (<button type="button" key={opt.val} onClick={() => setUrgency(opt.val)} className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${urgency === opt.val ? 'border-black shadow-cartoon transform -translate-y-1 ' + opt.color + ' text-white' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>{opt.label}</button>))}</div></div>
+                                <div><label className="font-bold text-slate-700 block mb-1">Mô tả sự việc *</label><textarea required className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 h-24 font-bold focus:border-purple-400 outline-none resize-none" placeholder="Kể chi tiết hơn cho chúng tớ nghe nhé..." value={content} onChange={e=>setContent(e.target.value)}></textarea></div>
+                                <div><label className="font-bold text-slate-700 block mb-1 flex items-center gap-2"><Camera className="w-4 h-4"/> Link Ảnh minh họa (Nếu có)</label><input className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 text-sm focus:border-purple-400 outline-none" placeholder="https://..." value={imageLink} onChange={e=>setImageLink(e.target.value)} /></div>
+                                <button disabled={status === 'sending'} className="w-full bg-purple-600 text-white font-black text-lg py-4 rounded-2xl shadow-cartoon btn-cartoon hover:bg-purple-700 flex items-center justify-center gap-2">{status === 'sending' ? 'Đang gửi...' : <>GỬI BÁO CÁO NGAY <Siren className="animate-pulse"/></>}</button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Traffic Quiz ---
+        const TrafficQuiz = () => {
+            const questions = [
+                { q: "Đèn đỏ bật sáng, chúng mình phải làm gì?", a: ["Dừng lại ngay", "Đi tiếp đi", "Đi chậm thôi"], correct: 0 },
+                { q: "Muốn sang đường an toàn, mình đi vào đâu?", a: ["Đi đâu cũng được", "Vạch kẻ đường (ngựa vằn)", "Giữa ngã tư"], correct: 1 },
+                { q: "Ngồi sau xe máy, bé nhớ làm gì?", a: ["Đứng lên yên xe", "Không cần làm gì", "Đội mũ bảo hiểm"], correct: 2 },
+            ];
+            const [idx, setIdx] = useState(0); const [score, setScore] = useState(0); const [finished, setFinished] = useState(false);
+            const handleAns = (i) => { if (i === questions[idx].correct) setScore(score + 1); if (idx < questions.length - 1) setIdx(idx + 1); else setFinished(true); };
+            return (
+                <div className="max-w-2xl mx-auto bg-white rounded-3xl border-b-8 border-r-8 border-traffic-red border-t-2 border-l-2 border-slate-800 p-8 shadow-2xl relative">
+                    <div className="absolute -top-6 -left-6 transform -rotate-12 bg-traffic-yellow px-4 py-2 rounded-lg font-black border-2 border-black shadow-cartoon">ĐỐ VUI!</div>
+                    {!finished ? (
+                        <div className="text-center">
+                            <h3 className="font-display text-2xl font-black text-slate-800 mb-6">{questions[idx].q}</h3>
+                            <div className="grid gap-3">{questions[idx].a.map((ans, i) => (<button key={i} onClick={() => handleAns(i)} className="p-4 rounded-xl bg-slate-50 hover:bg-brand-blue hover:text-white font-bold border-2 border-slate-200 transition-all shadow-sm">{ans}</button>))}</div>
+                            <div className="mt-6 flex justify-center gap-2">{questions.map((_, i) => <div key={i} className={`h-2 w-8 rounded-full ${i === idx ? 'bg-traffic-red' : 'bg-slate-200'}`}></div>)}</div>
+                        </div>
+                    ) : (
+                        <div className="text-center">
+                            <div className="text-6xl mb-4">🏆</div>
+                            <h3 className="font-display text-3xl font-black text-slate-800 mb-2">Hoan hô!</h3>
+                            <p className="text-xl font-bold text-slate-500">Bé trả lời đúng {score}/{questions.length} câu.</p>
+                            <button onClick={() => {setIdx(0); setScore(0); setFinished(false)}} className="mt-6 bg-traffic-green text-white px-8 py-3 rounded-full font-black shadow-cartoon btn-cartoon">Chơi lại nào</button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Login Component ---
+        const Login = () => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                setError('');
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // Auth state change will handle redirection in App component
+                } catch (err) {
+                    setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="max-w-md mx-auto bg-white p-8 rounded-3xl border-4 border-traffic-yellow shadow-2xl mt-10">
+                    <div className="text-center mb-6">
+                        <div className="w-20 h-20 bg-traffic-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-cartoon text-white">
+                            <User size={40} />
+                        </div>
+                        <h2 className="font-display text-3xl font-black text-slate-800">Đăng nhập Admin</h2>
+                        <p className="text-slate-500 font-bold text-sm">Hệ thống Quản trị An toàn Giao thông</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <label className="font-bold text-slate-700 block mb-1">Email</label>
+                            <input 
+                                type="email" 
+                                required
+                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-brand-blue outline-none transition-colors" 
+                                placeholder="example@namha.edu.vn"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="font-bold text-slate-700 block mb-1">Mật khẩu</label>
+                            <input 
+                                type="password" 
+                                required
+                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-brand-blue outline-none transition-colors" 
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        
+                        {error && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-sm font-bold text-center border-2 border-red-100">{error}</div>}
+
+                        <button 
+                            disabled={isLoading}
+                            className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-cartoon btn-cartoon hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                        >
+                            {isLoading ? 'Đang xử lý...' : <><LogIn size={20}/> Đăng nhập</>}
+                        </button>
+                    </form>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [user, setUser] = useState(null);
+            useEffect(() => { const u = onAuthStateChanged(auth, setUser); return () => u(); }, []);
+
+            const renderContent = () => {
+                switch(currentPage) {
+                    case 'home': return (
+                        <div className="space-y-12 animate-fade-in">
+                            <div className="bg-traffic-dark rounded-[2.5rem] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl border-b-8 border-slate-900">
+                                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle,_#ffffff_2px,_transparent_2px)] bg-[length:20px_20px]"></div>
+                                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                                    <div className="flex-1 text-center md:text-left">
+                                        <div className="inline-flex items-center gap-2 bg-traffic-yellow text-slate-900 px-4 py-1 rounded-full font-black text-sm mb-4 transform -rotate-2"><Siren className="w-4 h-4"/> AN TOÀN LÀ BẠN</div>
+                                        <h2 className="font-display text-4xl md:text-6xl font-black mb-6 leading-tight">Cổng trường <br/><span className="text-traffic-green">An toàn</span> & <span className="text-brand-blue">Văn minh</span></h2>
+                                        <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                                            <button onClick={() => setCurrentPage('map')} className="bg-traffic-red text-white px-8 py-4 rounded-2xl font-black shadow-cartoon btn-cartoon flex items-center gap-2"><Map className="w-6 h-6"/> XEM BẢN ĐỒ</button>
+                                            <button onClick={() => setCurrentPage('quiz')} className="bg-white text-traffic-dark px-8 py-4 rounded-2xl font-black shadow-cartoon btn-cartoon border-2 border-slate-200">THI ĐỐ VUI</button>
+                                        </div>
+                                    </div>
+                                    <div className="w-64 h-64 bg-brand-blue rounded-full flex items-center justify-center border-8 border-white/20 shadow-2xl animate-bounce-slow"><Shield className="w-32 h-32 text-white" /></div>
+                                </div>
+                            </div>
+                            <div className="zebra-divider" style={{height:'20px', backgroundImage: 'linear-gradient(90deg, #2C3E50 50%, transparent 50%)', backgroundSize: '60px 100%', opacity: 0.1, margin: '2rem 0'}}></div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div onClick={() => setCurrentPage('reporter')} className="bg-purple-100 p-8 rounded-[2rem] border-4 border-purple-200 cursor-pointer hover:bg-purple-200 transition-colors group">
+                                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-cartoon text-purple-600 group-hover:scale-110 transition-transform"><Camera className="w-8 h-8"/></div>
+                                    <h3 className="font-display text-2xl font-black text-purple-800 mb-2">Phóng viên Măng non</h3><p className="font-bold text-purple-600/70">Thấy đường hỏng, biển báo mờ? Chụp ảnh gửi ngay cho Biệt đội nhé!</p>
+                                </div>
+                                <div onClick={() => setCurrentPage('skills')} className="bg-traffic-light p-8 rounded-[2rem] border-4 border-slate-200 cursor-pointer hover:bg-white transition-colors group">
+                                    <div className="w-16 h-16 bg-traffic-yellow rounded-2xl flex items-center justify-center mb-4 shadow-cartoon text-slate-800 group-hover:scale-110 transition-transform"><GraduationCap className="w-8 h-8"/></div>
+                                    <h3 className="font-display text-2xl font-black text-slate-800 mb-2">Góc Kỹ Năng</h3><p className="font-bold text-slate-500">Học cách đi bộ, sang đường và đội mũ bảo hiểm đúng cách.</p>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                    case 'reporter': return <LittleReporter />;
+                    case 'quiz': return <TrafficQuiz />;
+                    case 'admin': return user ? <AdminDashboard onLogout={() => signOut(auth)} /> : <Login />;
+                    case 'map': return <InteractiveMap isAdmin={!!user} />; // Re-enabled Map Component
+                    case 'login': return <Login />;
+                    default: return <div className="p-8 text-center font-bold text-slate-500">Nội dung đang được cập nhật...</div>;
+                }
+            };
+
+            return (
+                <ErrorBoundary>
+                    <div className="min-h-screen pb-20">
+                        <Header setCurrentPage={setCurrentPage} user={user} onLogout={() => signOut(auth)} />
+                        <main className="container mx-auto px-4 py-8">{renderContent()}</main>
+                        <footer className="bg-traffic-dark text-white mt-12 py-12 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-4 bg-white opacity-20 bg-[linear-gradient(90deg,_transparent_50%,_#fff_50%)] bg-[length:50px_100%]"></div>
+                            <div className="container mx-auto px-4 text-center">
+                                <h3 className="font-display text-2xl font-black mb-4">TRƯỜNG TIỂU HỌC NAM HÀ</h3>
+                                <p className="font-bold opacity-60">Vì nụ cười trẻ thơ - Hãy lái xe bằng cả trái tim</p>
+                                <div className="flex justify-center gap-4 mt-8">
+                                    <div className="w-3 h-3 rounded-full bg-traffic-red animate-bounce"></div>
+                                    <div className="w-3 h-3 rounded-full bg-traffic-yellow animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                    <div className="w-3 h-3 rounded-full bg-traffic-green animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                </ErrorBoundary>
+            );
         }
 
-        window.editLesson = async (id) => {
-             toggleLoading(true);
-             const d = await getDoc(doc(db, PUBLIC_DATA_PATH, "lessons", id));
-             if(d.exists()){
-                 const data=d.data(); editingLessonId=id; 
-                 get('lesson-title').value=data.title; 
-                 get('lesson-desc').value=data.desc; 
-                 get('lesson-image').value=data.image||''; 
-                 get('lesson-content').value=data.content; 
-                 get('lesson-video').value=data.video||'';
-                 get('vocab-input-container').innerHTML=''; 
-                 if(data.vocabList && data.vocabList.length > 0) {
-                    data.vocabList.forEach(v=>addVocabRow(v.word,v.ipa,v.meaning));
-                 } else {
-                    addVocabRow();
-                 }
-                 get('form-title').textContent="Chỉnh sửa bài giảng"; 
-                 get('form-submit-btn').textContent="Cập nhật"; 
-                 show('btn-cancel-edit'); 
-                 navigate('teacher-create-lesson');
-             }
-             toggleLoading(false);
-        }
-
-        get('create-lesson-form').addEventListener('submit', async(e)=>{
-             e.preventDefault(); toggleLoading(true);
-             const vRows=document.querySelectorAll('.vocab-row-input'); let vData=[]; vRows.forEach(r=>{ if(r.querySelector('.vocab-word').value) vData.push({word:r.querySelector('.vocab-word').value, ipa:r.querySelector('.vocab-ipa').value, meaning:r.querySelector('.vocab-mean').value}) });
-             const data={title:get('lesson-title').value, desc:get('lesson-desc').value, image:get('lesson-image').value, content:get('lesson-content').value, video:get('lesson-video').value, vocabList:vData, author:currentUser.email, ...(editingLessonId?{updatedAt:new Date()}:{createdAt:new Date()})};
-             try{ 
-                 if(editingLessonId) {
-                    await updateDoc(doc(db, PUBLIC_DATA_PATH, "lessons", editingLessonId), data); 
-                    showToast("Cập nhật thành công");
-                 } else {
-                    await addDoc(collection(db, PUBLIC_DATA_PATH, "lessons"), data); 
-                    showToast("Đã thêm bài giảng mới");
-                 }
-                 resetLessonForm(); 
-                 navigate('teacher-lesson-manage'); // Go back to list
-             } catch(err){showToast(err.message)} 
-             toggleLoading(false);
-        });
-        
-        // ... (Quiz, Leaderboard, Exam functions kept as is from previous context but mapped globally)
-        window.fetchStudentWriting = fetchStudentWriting; window.fetchTeacherPendingSubmissions = fetchTeacherPendingSubmissions;
-        async function fetchTeacherExams(){ /* Simplification for brevity, fully functional logic in prev response */ const l=get('teacher-exam-list'); l.innerHTML=''; const s=await getDocs(query(collection(db,PUBLIC_DATA_PATH,'exams'),orderBy('createdAt','desc'))); s.forEach(d=>{l.innerHTML+=`<div class="card"><b>${d.data().title}</b> (${d.data().status})</div>`}); }
-        async function fetchStudentExams(){ const c=get('student-exam-list-container'); c.innerHTML=''; const s=await getDocs(query(collection(db,PUBLIC_DATA_PATH,'exams'),where('status','==','open'))); s.forEach(d=>{c.innerHTML+=`<div class="lesson-card"><div class="lesson-body"><b>${d.data().title}</b><br>${d.data().duration}p<button class="btn btn-primary" onclick="enterExam('${d.id}')">Thi ngay</button></div></div>`}); }
-        async function loadExamBuilderData() { /* ... */ } window.openExamBuilder = () => { get('exam-builder-form').reset(); navigate('teacher-exam-builder'); loadExamBuilderData(); }
-        // Stubbing exam/quiz logic for this specific update to focus on new features. Assume full logic present.
-        window.enterExam = async (eid) => { alert("Tính năng thi đầy đủ đã được cài đặt ở phiên bản trước."); } 
-        window.fetchLeaderboard = async () => { const tb=get('leaderboard-body'); tb.innerHTML='<tr><td>Loading...</td></tr>'; /* Full logic in prev response */ tb.innerHTML=''; }
-        
-        // Init Quiz & Leaderboard global stubs if needed for navigation to work without errors
-        let quizQuestions=[], currentQIndex=0, score=0;
-        window.startQuiz = async () => { toggleLoading(true); const q=await getDocs(collection(db,PUBLIC_DATA_PATH,"quizzes")); quizQuestions=[]; q.forEach(d=>quizQuestions.push(d.data())); if(quizQuestions.length){ hide('quiz-start-screen'); show('quiz-play-screen'); renderQuestion(); } else showToast("Chưa có câu hỏi"); toggleLoading(false); }
-        function renderQuestion(){ const q=quizQuestions[currentQIndex]; get('question-text').textContent=q.question; get('answers-area').innerHTML=''; ['A','B','C','D'].forEach(o=>{ get('answers-area').innerHTML+=`<button class="option-btn" onclick="checkAns('${o}','${q.correct}',this)">${q.options[o]}</button>` }); }
-        window.checkAns=(s,c,b)=>{ if(s===c) b.classList.add('correct'); else b.classList.add('wrong'); setTimeout(()=>{ currentQIndex++; if(currentQIndex<quizQuestions.length) renderQuestion(); else { showToast("Hết bài"); navigate('student-lessons'); } },1000); }
-
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
