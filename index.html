@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biệt Đội Giao Thông Xanh - TH Nam Hà</title>
     
     <!-- Google Fonts: Baloo 2 & Nunito -->
@@ -33,22 +33,30 @@
                         }
                     },
                     boxShadow: {
-                        'cartoon': '0 4px 0 rgba(0,0,0,0.15)',
-                        'cartoon-hover': '0 2px 0 rgba(0,0,0,0.15)',
-                        'soft': '0 4px 20px -5px rgba(0, 0, 0, 0.1)',
+                        'cartoon': '0 6px 0 rgba(0,0,0,0.15)',
+                        'cartoon-hover': '0 3px 0 rgba(0,0,0,0.15)',
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
                     },
                     animation: {
                         'bounce-slow': 'bounce 3s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
                     }
                 }
             }
         }
     </script>
     
-    <!-- Leaflet & Modules -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <!-- Import Map: Đã sửa lại Firebase import sang gstatic để fix lỗi "Service not available" -->
     <script type="importmap">
     {
       "imports": {
@@ -67,25 +75,24 @@
         body { 
             background-color: #f0f4f8; 
             background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 24px 24px;
-            -webkit-tap-highlight-color: transparent;
+            background-size: 20px 20px;
         }
         
-        /* Map Styles */
+        /* Map Custom Styles */
         .custom-div-icon { background: transparent; border: none; }
         .leaflet-popup-content-wrapper { border-radius: 1rem; border: 3px solid #FFD740; box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
-        .leaflet-popup-content { font-family: 'Nunito', sans-serif; font-weight: 700; margin: 0.5rem; font-size: 14px; }
+        .leaflet-popup-content { font-family: 'Nunito', sans-serif; font-weight: 700; margin: 0.8rem; }
         .cursor-crosshair { cursor: crosshair !important; }
         
         /* Interactive Elements */
-        .btn-cartoon { transition: transform 0.1s, box-shadow 0.1s; user-select: none; }
-        .btn-cartoon:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0.15) !important; }
+        .btn-cartoon { transition: all 0.1s; }
+        .btn-cartoon:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(0,0,0,0.15) !important; }
 
-        /* Rich Text */
+        /* Rich Text Styles */
         .rte-content h1, .rte-content h2 { font-family: 'Baloo 2', cursive; color: #2C3E50; }
         .rte-content img { border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; max-width: 100%; height: auto; }
         
-        /* Pulse for Map */
+        /* User Location Pulse */
         @keyframes pulse-blue {
             0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
@@ -97,11 +104,10 @@
             border-radius: 50%;
             animation: pulse-blue 2s infinite;
         }
-        /* Leaflet Z-Index fix */
+        
+        /* Leaflet Z-Index fixes */
         .leaflet-pane { z-index: 10; }
         .leaflet-top, .leaflet-bottom { z-index: 20; }
-        
-        .overflow-x-auto { -webkit-overflow-scrolling: touch; }
     </style>
 </head>
 <body class="text-slate-700 antialiased selection:bg-traffic-yellow selection:text-slate-900">
@@ -110,13 +116,14 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo } from 'react';
         import { createRoot } from 'react-dom/client';
+        // Đổi tên Map thành MapIcon để tránh xung đột với object Map của JS hoặc Leaflet
         import { 
-          Map, AlertTriangle, FileText, Megaphone, Shield, 
-          Award, LogIn, LogOut, Plus, Trash2, Save, Menu, X, Edit,
+          Map as MapIcon, AlertTriangle, FileText, Megaphone, Shield, 
+          Award, LogIn, Plus, Trash2, Save, Menu, X, Edit,
           Navigation, Info, User, Layout, MapPin, CheckSquare, XCircle,
           Eye, EyeOff, MousePointer2, Undo2, ArrowLeft, Calendar,
           Bold, Italic, Underline, Search, MessageSquare, CheckCircle, HelpCircle, LocateFixed,
-          GraduationCap, BookOpen, Star, Heart, Camera, Flag, Siren, Layers, Home, ChevronDown, Lock
+          GraduationCap, BookOpen, Star, Heart, Camera, Flag, Siren, Layers
         } from 'lucide-react';
         import { initializeApp } from 'firebase/app';
         import { 
@@ -133,12 +140,18 @@
             constructor(props) { super(props); this.state = { hasError: false, error: null }; }
             static getDerivedStateFromError(error) { return { hasError: true, error }; }
             render() {
-                if (this.state.hasError) return <div className="p-6 text-center text-red-500 font-bold bg-white rounded-xl shadow-cartoon m-4">Ôi hỏng rồi! Gọi đội cứu hộ thôi! 🚑 <br/><button onClick={() => window.location.reload()} className="mt-4 bg-brand-blue text-white px-6 py-2 rounded-full font-bold">Thử lại</button></div>;
+                if (this.state.hasError) return (
+                    <div className="p-8 text-center text-red-500 font-bold bg-white rounded-xl shadow-cartoon m-4">
+                        Ôi hỏng rồi! Gọi đội cứu hộ thôi! 🚑 <br/>
+                        <button onClick={() => window.location.reload()} className="mt-4 bg-traffic-blue text-white px-4 py-2 rounded-full">Thử lại</button>
+                    </div>
+                );
                 return this.props.children;
             }
         }
 
         // --- Firebase Config ---
+        // Lưu ý: Việc để lộ API Key ở frontend là bình thường với Firebase nếu đã config Security Rules chặt chẽ.
         const firebaseConfig = {
           apiKey: "AIzaSyA7A_VxnEqlYMebteU76Om0FnrkVH8Pdl4",
           authDomain: "atgt-6c132.firebaseapp.com",
@@ -162,86 +175,59 @@
             { id: 'E', label: 'Chốt trực (CA/Đoàn)', color: 'text-traffic-yellow', bg: 'bg-yellow-100', icon: <User className="w-4 h-4" /> },
         ];
 
-        // --- Sidebar Item (Moved outside to prevent re-render crashes) ---
-        const SidebarItem = ({ id, label, icon, activeTab, setActiveTab, setIsSidebarOpen }) => (
-            <button onClick={() => {setActiveTab(id); setIsSidebarOpen(false);}} 
-                className={`w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 transition-colors ${activeTab === id ? 'bg-brand-blue text-white shadow-lg' : 'hover:bg-slate-100 text-slate-600'}`}>
-                {icon} {label}
-            </button>
-        );
-
         // --- Header ---
         const Header = ({ setCurrentPage, user, onLogout }) => {
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             const navItems = [
-                { id: 'home', label: 'Trang chủ', icon: <Star className="w-5 h-5"/>, color: 'text-traffic-green' },
-                { id: 'news', label: 'Tin tức', icon: <Megaphone className="w-5 h-5"/>, color: 'text-brand-blue' },
-                { id: 'skills', label: 'Kỹ năng', icon: <BookOpen className="w-5 h-5"/>, color: 'text-traffic-yellow' },
-                { id: 'quiz', label: 'Đố vui', icon: <Award className="w-5 h-5"/>, color: 'text-traffic-red' }, 
-                { id: 'reporter', label: 'Phóng viên', icon: <Camera className="w-5 h-5"/>, color: 'text-purple-500' }, 
-                { id: 'map', label: 'Bản đồ', icon: <Map className="w-5 h-5"/>, color: 'text-traffic-dark' },
+                { id: 'home', label: 'Trang chủ', icon: <Star className="w-4 h-4"/>, color: 'hover:bg-traffic-green' },
+                { id: 'news', label: 'Tin tức', icon: <Megaphone className="w-4 h-4"/>, color: 'hover:bg-brand-blue' },
+                { id: 'skills', label: 'Kỹ năng', icon: <BookOpen className="w-4 h-4"/>, color: 'hover:bg-traffic-yellow' },
+                { id: 'quiz', label: 'Đố vui', icon: <Award className="w-4 h-4"/>, color: 'hover:bg-traffic-red' }, 
+                { id: 'reporter', label: 'Phóng viên', icon: <Camera className="w-4 h-4"/>, color: 'hover:bg-purple-500' }, 
+                { id: 'map', label: 'Bản đồ', icon: <MapIcon className="w-4 h-4"/>, color: 'hover:bg-traffic-dark' },
             ];
 
             return (
-                <header className="bg-white border-b-4 border-traffic-dark sticky top-0 z-50 shadow-sm">
-                    <div className="container max-w-7xl mx-auto px-4 py-2 flex justify-between items-center h-16 md:h-20">
-                        <div className="flex items-center gap-3 cursor-pointer group select-none shrink-0" onClick={() => setCurrentPage('home')}>
+                <header className="bg-white border-b-4 border-traffic-dark sticky top-0 z-50">
+                    <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+                        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setCurrentPage('home')}>
                             <div className="relative">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-traffic-dark rounded-xl flex items-center justify-center border-2 border-white shadow-lg group-hover:rotate-6 transition-transform">
-                                    <Shield className="text-traffic-yellow w-6 h-6 md:w-8 md:h-8" />
+                                <div className="w-12 h-12 bg-traffic-dark rounded-xl flex items-center justify-center border-2 border-white shadow-lg group-hover:rotate-12 transition-transform">
+                                    <Shield className="text-traffic-yellow w-8 h-8" />
                                 </div>
-                                <div className="absolute -top-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-traffic-red rounded-full border-2 border-white animate-pulse"></div>
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-traffic-red rounded-full border-2 border-white animate-pulse"></div>
                             </div>
-                            <div className="leading-tight">
-                                <h1 className="font-display font-black text-lg md:text-2xl text-traffic-dark uppercase tracking-tight">Biệt Đội <span className="text-traffic-green hidden sm:inline">Giao Thông</span></h1>
-                                <p className="text-[10px] md:text-xs font-bold text-slate-500 bg-slate-100 inline-block px-2 py-0.5 rounded-full">Trường TH Nam Hà</p>
+                            <div>
+                                <h1 className="font-display font-black text-xl md:text-2xl text-traffic-dark uppercase tracking-tight leading-none">Biệt Đội <span className="text-traffic-green">Giao Thông</span></h1>
+                                <p className="text-xs font-bold text-slate-400 bg-slate-100 inline-block px-2 py-0.5 rounded-full mt-1">Trường TH Nam Hà</p>
                             </div>
                         </div>
 
-                        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+                        <nav className="hidden xl:flex items-center gap-2">
                             {navItems.map(item => (
-                                <button key={item.id} onClick={() => setCurrentPage(item.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full font-bold text-slate-600 transition-all hover:bg-slate-100 active:scale-95 text-sm xl:text-base whitespace-nowrap`}>
-                                    <span className={item.color}>{item.icon}</span>
+                                <button key={item.id} onClick={() => setCurrentPage(item.id)} className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-slate-600 transition-all hover:text-white btn-cartoon shadow-cartoon hover:shadow-cartoon-hover ${item.color}`}>
                                     {item.label}
                                 </button>
                             ))}
-                            <div className="h-6 w-px bg-slate-200 mx-2"></div>
                             {user ? (
-                                <button onClick={() => setCurrentPage('admin')} className="bg-traffic-red text-white px-5 py-2 rounded-full font-bold shadow-cartoon btn-cartoon flex items-center gap-2 shrink-0 whitespace-nowrap">
+                                <button onClick={() => setCurrentPage('admin')} className="ml-4 bg-traffic-red text-white px-5 py-2 rounded-full font-bold shadow-cartoon btn-cartoon flex items-center gap-2">
                                     <User className="w-4 h-4"/> Admin
                                 </button>
                             ) : (
-                                <button onClick={() => setCurrentPage('login')} className="bg-traffic-yellow text-traffic-dark px-5 py-2 rounded-full font-black shadow-cartoon btn-cartoon flex items-center gap-2 border-2 border-traffic-dark shrink-0 whitespace-nowrap">
+                                <button onClick={() => setCurrentPage('login')} className="ml-4 bg-traffic-yellow text-traffic-dark px-5 py-2 rounded-full font-black shadow-cartoon btn-cartoon flex items-center gap-2 border-2 border-traffic-dark">
                                     <LogIn className="w-4 h-4" /> Đăng nhập
                                 </button>
                             )}
                         </nav>
-
-                        <button className="lg:hidden p-2 active:bg-slate-100 rounded-xl transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                            {isMenuOpen ? <X size={28} className="text-traffic-red" /> : <Menu size={28} className="text-traffic-dark" />}
-                        </button>
+                        <button className="xl:hidden p-2 bg-slate-100 rounded-lg" onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button>
                     </div>
-
                     {isMenuOpen && (
-                        <div className="lg:hidden fixed inset-0 z-40 bg-white top-[68px] overflow-y-auto animate-in slide-in-from-top-10 duration-200 border-t-2 border-slate-100">
-                            <div className="p-4 grid grid-cols-2 gap-4">
-                                {navItems.map(item => (
-                                    <button key={item.id} onClick={() => { setCurrentPage(item.id); setIsMenuOpen(false); }} className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl active:bg-slate-100 font-bold text-slate-700 border-2 border-slate-100 active:border-brand-blue transition-colors">
-                                        <div className={`p-3 rounded-full bg-white shadow-sm mb-3 ${item.color}`}>{item.icon}</div>
-                                        <span className="text-base">{item.label}</span>
-                                    </button>
-                                ))}
+                        <div className="xl:hidden bg-white border-t-2 border-slate-100 p-4 absolute w-full shadow-xl">
+                            <div className="grid grid-cols-2 gap-3">
+                                {navItems.map(item => (<button key={item.id} onClick={() => { setCurrentPage(item.id); setIsMenuOpen(false); }} className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl hover:bg-slate-100 font-bold text-slate-700"><div className={`p-2 rounded-full text-white mb-2 ${item.color.replace('hover:', '')}`}>{item.icon}</div>{item.label}</button>))}
                             </div>
-                            <div className="p-4 border-t border-dashed border-slate-200 mt-2 pb-20">
-                                {user ? (
-                                    <button onClick={() => { setCurrentPage('admin'); setIsMenuOpen(false); }} className="w-full bg-red-50 text-red-600 py-4 rounded-xl font-bold border-2 border-red-100 flex items-center justify-center gap-2 btn-cartoon">
-                                        <User/> Vào trang Quản trị
-                                    </button>
-                                ) : (
-                                    <button onClick={() => {setCurrentPage('login'); setIsMenuOpen(false);}} className="w-full bg-traffic-yellow text-traffic-dark py-4 rounded-xl font-bold shadow-cartoon border-2 border-traffic-dark flex items-center justify-center gap-2 btn-cartoon">
-                                        <LogIn/> Đăng nhập Quản trị
-                                    </button>
-                                )}
+                            <div className="mt-4 pt-4 border-t border-dashed">
+                                {user ? <button onClick={() => setCurrentPage('admin')} className="w-full bg-red-100 text-red-600 py-3 rounded-xl font-bold">Trang Quản trị</button> : <button onClick={() => {setCurrentPage('login'); setIsMenuOpen(false);}} className="w-full bg-traffic-yellow text-traffic-dark py-3 rounded-xl font-bold shadow-cartoon btn-cartoon">Đăng nhập Quản trị</button>}
                             </div>
                         </div>
                     )}
@@ -256,17 +242,17 @@
             const execCmd = (command, val = null) => { document.execCommand(command, false, val); editorRef.current.focus(); };
             return (
                 <div className="border-2 border-slate-200 rounded-xl bg-white overflow-hidden">
-                    <div className="flex gap-1 p-2 bg-slate-50 border-b border-slate-200 overflow-x-auto">
+                    <div className="flex gap-1 p-2 bg-slate-50 border-b border-slate-200">
                         {['bold', 'italic', 'underline'].map(cmd => (
-                            <button key={cmd} type="button" onClick={() => execCmd(cmd)} className="p-2 hover:bg-white rounded font-bold capitalize min-w-[40px]">{cmd[0]}</button>
+                            <button key={cmd} type="button" onClick={() => execCmd(cmd)} className="p-2 hover:bg-white rounded font-bold capitalize">{cmd[0]}</button>
                         ))}
                     </div>
-                    <div ref={editorRef} contentEditable suppressContentEditableWarning={true} className="p-4 min-h-[150px] focus:outline-none rte-content text-sm md:text-base" onInput={() => onChange(editorRef.current.innerHTML)}></div>
+                    <div ref={editorRef} contentEditable suppressContentEditableWarning={true} className="p-4 min-h-[150px] focus:outline-none rte-content" onInput={() => onChange(editorRef.current.innerHTML)}></div>
                 </div>
             );
         };
 
-        // --- Leaflet Map Component (Mobile Optimized) ---
+        // --- Leaflet Map Component ---
         const LeafletMap = ({ markers, activeLayers, onMapClick, drawingData, userLocation }) => {
             const mapContainerRef = useRef(null);
             const mapInstanceRef = useRef(null);
@@ -285,9 +271,9 @@
                 window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
                 mapInstanceRef.current = map;
                 updateLayers(map);
-                setTimeout(() => { map.invalidateSize(); }, 100);
             };
 
+            // Drawing logic
             useEffect(() => {
                 if (!mapInstanceRef.current || !window.L) return;
                 const map = mapInstanceRef.current;
@@ -308,6 +294,7 @@
                 }
             }, [drawingData]);
 
+            // Click Handler
             useEffect(() => {
                 if (!mapInstanceRef.current) return;
                 const map = mapInstanceRef.current;
@@ -317,6 +304,7 @@
                 return () => { map.off('click', clickHandler); };
             }, [onMapClick]);
 
+            // User Location
             useEffect(() => {
                 if (!mapInstanceRef.current || !window.L || !userLocation) return;
                 const map = mapInstanceRef.current;
@@ -327,6 +315,7 @@
                 map.setView([userLocation.lat, userLocation.lng], 16);
             }, [userLocation]);
 
+            // Markers Update
             useEffect(() => { if (mapInstanceRef.current && window.L) updateLayers(mapInstanceRef.current); }, [markers, activeLayers]);
 
             const updateLayers = (map) => {
@@ -382,32 +371,32 @@
             };
 
             return (
-                <div className="bg-white p-4 md:p-6 rounded-3xl shadow-cartoon border-4 border-slate-200">
+                <div className="bg-white p-6 rounded-3xl shadow-cartoon border-4 border-slate-200">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div>
                             <h2 className="font-display text-2xl font-black text-slate-800 flex items-center gap-2">
-                                <span className="bg-blue-100 p-2 rounded-xl text-brand-blue"><Map className="w-6 h-6" /></span> Bản đồ Giao thông số
+                                <span className="bg-blue-100 p-2 rounded-xl text-brand-blue"><MapIcon className="w-6 h-6" /></span> Bản đồ Giao thông số
                             </h2>
-                            <p className="text-sm font-bold text-slate-400 mt-1 ml-1 hidden md:block">Dữ liệu thực tế khu vực Phường Thành Sen</p>
+                            <p className="text-sm font-bold text-slate-400 mt-1 ml-1">Dữ liệu thực tế khu vực Phường Thành Sen</p>
                         </div>
-                        <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
-                            {isAdmin && <span className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-black flex items-center border-2 border-yellow-200 animate-pulse"><MousePointer2 className="w-3 h-3 mr-1"/> Chọn điểm</span>}
-                            <button onClick={locateUser} className="flex-1 md:flex-none bg-sky-100 text-brand-blue px-4 py-2 rounded-full hover:bg-sky-200 font-bold flex items-center justify-center gap-2 btn-cartoon border-2 border-sky-200 text-sm" title="Vị trí của tôi"><LocateFixed className="w-4 h-4"/> Vị trí của tôi</button>
+                        <div className="flex flex-wrap gap-3 items-center">
+                            {isAdmin && <span className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-black flex items-center border-2 border-yellow-200 animate-pulse"><MousePointer2 className="w-3 h-3 mr-1"/> Click bản đồ để chọn</span>}
+                            <button onClick={locateUser} className="bg-sky-100 text-brand-blue px-4 py-2 rounded-full hover:bg-sky-200 font-bold flex items-center gap-2 btn-cartoon border-2 border-sky-200" title="Vị trí của tôi"><LocateFixed className="w-4 h-4"/> Vị trí của tôi</button>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        <div className="lg:col-span-1 space-y-3 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 h-fit max-h-[300px] overflow-y-auto">
-                            <h3 className="font-display font-bold text-slate-700 mb-3 flex items-center gap-2 sticky top-0 bg-slate-50 z-10"><Layers className="w-4 h-4"/> Lớp dữ liệu</h3>
+                        <div className="lg:col-span-1 space-y-3 bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 h-fit">
+                            <h3 className="font-display font-bold text-slate-700 mb-3 flex items-center gap-2"><Layers className="w-4 h-4"/> Lớp dữ liệu</h3>
                             {MAP_LAYERS.map(layer => (
                                 <div key={layer.id} className={`flex items-center gap-3 cursor-pointer group p-3 rounded-xl transition-all border-2 ${activeLayers.includes(layer.id) ? 'bg-white border-brand-blue shadow-sm' : 'border-transparent hover:bg-white'}`} onClick={() => toggleLayer(layer.id)}>
-                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors shrink-0 ${activeLayers.includes(layer.id) ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-400'}`}>
+                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${activeLayers.includes(layer.id) ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-400'}`}>
                                         {activeLayers.includes(layer.id) && <CheckSquare className="w-3.5 h-3.5" />}
                                     </div>
-                                    <span className={`text-xs md:text-sm font-bold flex items-center gap-2 ${layer.color}`}>{layer.icon} {layer.label}</span>
+                                    <span className={`text-sm font-bold flex items-center gap-2 ${layer.color}`}>{layer.icon} {layer.label}</span>
                                 </div>
                             ))}
                         </div>
-                        <div className="lg:col-span-3 bg-indigo-50 h-[400px] md:h-[500px] rounded-2xl border-4 border-slate-200 shadow-inner relative overflow-hidden group z-0">
+                        <div className="lg:col-span-3 bg-indigo-50 h-[500px] rounded-2xl border-4 border-slate-200 shadow-inner relative overflow-hidden group z-0">
                             {loading ? <div className="absolute inset-0 flex items-center justify-center font-bold text-brand-blue animate-pulse">Đang tải bản đồ...</div> : <LeafletMap markers={markers} activeLayers={activeLayers} onMapClick={onMapClick} drawingData={drawingData} userLocation={userLocation} />}
                         </div>
                     </div>
@@ -415,7 +404,7 @@
             );
         };
 
-        // --- Admin Dashboard (Fixed Crash Issue) ---
+        // --- Admin Dashboard ---
         const AdminDashboard = ({ onLogout }) => {
             const [activeTab, setActiveTab] = useState('news'); 
             const [title, setTitle] = useState('');
@@ -423,9 +412,8 @@
             const [category, setCategory] = useState('Tin tức');
             const [status, setStatus] = useState('');
             const [editingId, setEditingId] = useState(null);
-            const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
             
-            // Map logic
+            // Map logic variables
             const [geometryType, setGeometryType] = useState('point'); 
             const [lat, setLat] = useState('');
             const [lng, setLng] = useState('');
@@ -455,7 +443,11 @@
                 if (activeTab === 'map') {
                     setMarkerType(item.type); setGeometryType(item.geometryType || 'point'); setIsVisible(item.isVisible !== false);
                     if (item.geometryType === 'point' || !item.geometryType) { setLat(item.lat); setLng(item.lng); setCoordString(''); }
-                    else { setCoordString(item.coordinates.map(p => p.join(',')).join('; ')); setLat(''); setLng(''); }
+                    else { 
+                        // Fix: Thêm optional chaining để tránh lỗi nếu item.coordinates không tồn tại
+                        setCoordString(item.coordinates?.map(p => p.join(',')).join('; ') || ''); 
+                        setLat(''); setLng(''); 
+                    }
                 } else { setContent(item.content); setCategory(item.category || 'Tin tức'); }
             };
 
@@ -494,129 +486,202 @@
             }, [activeTab, geometryType, lat, lng, coordString]);
 
             return (
-                <div className="flex flex-col lg:flex-row min-h-screen bg-slate-50"> 
-                    <div className={`fixed inset-0 z-50 bg-black/50 lg:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
-                    <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-50 transform lg:transform-none transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                        <div className="p-6 border-b border-slate-100">
-                            <h2 className="font-display text-2xl font-black text-slate-800 flex items-center gap-2"><User className="w-8 h-8 bg-brand-blue text-white p-1 rounded-lg"/> Admin</h2>
-                        </div>
-                        <div className="p-4 space-y-2">
-                            <SidebarItem id="news" label="Tin tức" icon={<Megaphone size={20}/>} activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-                            <SidebarItem id="docs" label="Văn bản" icon={<FileText size={20}/>} activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-                            <SidebarItem id="map" label="Bản đồ GIS" icon={<Map size={20}/>} activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-                            <SidebarItem id="reports" label="Báo cáo" icon={<Camera size={20}/>} activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} />
-                        </div>
-                        <div className="p-4 border-t border-slate-100 mt-auto">
-                            <button onClick={onLogout} className="w-full text-red-500 font-bold hover:bg-red-50 px-4 py-3 rounded-xl flex items-center gap-2"><LogOut size={20}/> Đăng xuất</button>
-                        </div>
-                    </aside>
+                <div className="bg-white p-6 rounded-3xl border-4 border-slate-200 shadow-xl mt-6 animate-fade-in">
+                    <div className="flex justify-between items-center mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 className="font-display text-2xl font-black text-slate-800 flex items-center gap-2"><User className="w-8 h-8 bg-slate-800 text-white p-1 rounded-lg"/> Trung tâm Chỉ huy Admin</h2>
+                        <button onClick={onLogout} className="text-red-500 font-bold hover:bg-red-50 px-3 py-1 rounded">Đăng xuất</button>
+                    </div>
+                    
+                    <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                        <button onClick={() => {setActiveTab('news'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'news' ? 'bg-blue-100 border-blue-500 text-blue-700' : 'border-slate-200 text-slate-500'}`}>📰 Tin tức</button>
+                        <button onClick={() => {setActiveTab('docs'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'docs' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' : 'border-slate-200 text-slate-500'}`}>📂 Văn bản</button>
+                        <button onClick={() => {setActiveTab('map'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'map' ? 'bg-traffic-dark border-slate-800 text-white' : 'border-slate-200 text-slate-500'}`}>🗺️ Bản đồ (GIS)</button>
+                        <button onClick={() => {setActiveTab('reports'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'reports' ? 'bg-purple-100 border-purple-500 text-purple-700' : 'border-slate-200 text-slate-500'}`}>📡 Báo cáo Măng non</button>
+                    </div>
 
-                    <div className="flex-1 flex flex-col h-screen overflow-hidden">
-                        <div className="bg-white p-4 border-b border-slate-200 flex lg:hidden justify-between items-center shrink-0">
-                            <div className="flex items-center gap-2 font-black text-slate-800"><Shield className="text-brand-blue"/> TRANG QUẢN TRỊ</div>
-                            <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-slate-100 rounded-lg"><Menu/></button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-4 md:p-8">
-                            <div className="max-w-6xl mx-auto">
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6 hidden lg:block">{activeTab === 'news' ? 'Quản lý Tin tức' : activeTab === 'docs' ? 'Quản lý Văn bản' : activeTab === 'map' ? 'Bản đồ số' : 'Báo cáo từ Học sinh'}</h2>
-                                
-                                {activeTab === 'reports' ? (
-                                    <div className="space-y-4">
-                                        {reports.map(item => (
-                                            <div key={item.id} className="bg-white border-2 border-slate-100 rounded-2xl p-4 hover:border-purple-200 transition-colors flex flex-col md:flex-row gap-4 shadow-sm">
-                                                {item.image && <img src={item.image} className="w-full md:w-32 h-32 object-cover rounded-xl border-2 border-slate-200 bg-slate-100" alt="Evidence" />}
-                                                <div className="flex-1">
-                                                    <div className="flex justify-between items-start">
-                                                        <div className="w-full">
-                                                            <div className="flex flex-wrap items-center gap-2 mb-2"><span className={`px-2 py-0.5 rounded text-xs font-black uppercase text-white ${item.urgency === 'high' ? 'bg-traffic-red' : item.urgency === 'medium' ? 'bg-traffic-yellow' : 'bg-traffic-green'}`}>{item.urgency === 'high' ? 'Nguy hiểm' : item.urgency === 'medium' ? 'Cần chú ý' : 'Bình thường'}</span><span className="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">{item.type}</span></div>
-                                                            <h3 className="font-bold text-lg text-slate-800">{item.name} báo cáo</h3>
-                                                            <p className="text-slate-600 mt-1 text-sm">{item.content}</p>
-                                                        </div>
-                                                        <button onClick={() => handleDelete('reports', item.id)} className="text-slate-300 hover:text-red-500 p-2"><Trash2 className="w-5 h-5"/></button>
-                                                    </div>
-                                                    <div className="mt-4 flex items-center gap-2 bg-slate-50 p-2 rounded-lg w-full md:w-fit"><span className="text-xs font-bold text-slate-400 whitespace-nowrap">Trạng thái:</span><select value={item.status || 'pending'} onChange={(e) => handleUpdateReport(item.id, e.target.value)} className="bg-white border border-slate-200 rounded px-2 py-1 text-sm font-bold outline-none cursor-pointer w-full md:w-auto"><option value="pending">⏳ Đang chờ</option><option value="processing">🛠️ Đang xử lý</option><option value="done">✅ Đã xong</option></select></div>
-                                                </div>
+                    {activeTab === 'reports' ? (
+                        <div className="space-y-4">
+                            {reports.map(item => (
+                                <div key={item.id} className="border-2 border-slate-100 rounded-2xl p-4 hover:border-purple-200 transition-colors flex flex-col md:flex-row gap-4">
+                                    {item.image && <img src={item.image} className="w-24 h-24 object-cover rounded-xl border-2 border-slate-200 bg-slate-100" alt="Evidence" />}
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1"><span className={`px-2 py-0.5 rounded text-xs font-black uppercase text-white ${item.urgency === 'high' ? 'bg-traffic-red' : item.urgency === 'medium' ? 'bg-traffic-yellow' : 'bg-traffic-green'}`}>{item.urgency === 'high' ? 'Nguy hiểm' : item.urgency === 'medium' ? 'Cần chú ý' : 'Bình thường'}</span><span className="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">{item.type}</span></div>
+                                                <h3 className="font-bold text-lg text-slate-800">{item.name} báo cáo</h3>
+                                                <p className="text-slate-600 mt-1">{item.content}</p>
                                             </div>
-                                        ))}
-                                        {reports.length === 0 && <p className="text-center text-slate-400 font-bold py-10">Chưa có báo cáo nào!</p>}
+                                            <button onClick={() => handleDelete('reports', item.id)} className="text-slate-300 hover:text-red-500"><Trash2 className="w-5 h-5"/></button>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-2 bg-slate-50 p-2 rounded-lg w-fit"><span className="text-xs font-bold text-slate-400">Trạng thái:</span><select value={item.status || 'pending'} onChange={(e) => handleUpdateReport(item.id, e.target.value)} className="bg-white border border-slate-200 rounded px-2 py-1 text-sm font-bold outline-none cursor-pointer"><option value="pending">⏳ Đang chờ</option><option value="processing">🛠️ Đang xử lý</option><option value="done">✅ Đã xong</option></select></div>
+                                    </div>
+                                </div>
+                            ))}
+                            {reports.length === 0 && <p className="text-center text-slate-400 font-bold py-10">Chưa có báo cáo nào!</p>}
+                        </div>
+                    ) : (
+                        <div className="grid lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-1 space-y-4">
+                                <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
+                                    <h3 className="font-bold text-slate-700 mb-3">{editingId ? 'Sửa' : 'Thêm'} {activeTab === 'map' ? 'Điểm' : 'Tin/Văn bản'}</h3>
+                                    <div className="space-y-3">
+                                        <input required className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" placeholder="Tiêu đề / Tên điểm" value={title} onChange={e=>setTitle(e.target.value)}/>
+                                        
+                                        {activeTab === 'map' ? (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <select className="p-2 rounded-xl border-2 font-bold" value={geometryType} onChange={e=>{setGeometryType(e.target.value); setCoordString(''); setLat(''); setLng('');}}><option value="point">Điểm</option><option value="polyline">Đường</option><option value="polygon">Vùng</option></select>
+                                                    <select className="p-2 rounded-xl border-2 font-bold" value={markerType} onChange={e=>setMarkerType(e.target.value)}><option value="A">Trường</option><option value="B">Đường</option><option value="C">Nguy cơ</option><option value="D">An toàn</option><option value="E">Chốt trực</option></select>
+                                                </div>
+                                                {geometryType === 'point' ? (
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <input type="number" step="any" className="p-2 rounded-xl border-2 font-bold" placeholder="Vĩ độ" value={lat} onChange={e=>setLat(e.target.value)}/>
+                                                        <input type="number" step="any" className="p-2 rounded-xl border-2 font-bold" placeholder="Kinh độ" value={lng} onChange={e=>setLng(e.target.value)}/>
+                                                    </div>
+                                                ) : (
+                                                    <textarea className="w-full p-2 rounded-xl border-2 h-20 text-xs font-mono" placeholder="Click bản đồ để vẽ..." value={coordString} readOnly></textarea>
+                                                )}
+                                                <p className="text-xs text-brand-blue font-bold italic">💡 Tip: Click lên bản đồ bên phải để lấy tọa độ tự động.</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <select className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" value={category} onChange={e=>setCategory(e.target.value)}>
+                                                    {activeTab === 'news' ? <><option>Tin tức</option><option>Gương điển hình</option><option>Kỹ năng</option></> : <><option>Văn bản nội bộ</option><option>Văn bản pháp luật</option><option>Mẫu cam kết</option></>}
+                                                </select>
+                                                {activeTab === 'news' ? <SimpleRichTextEditor value={content} onChange={setContent} /> : <input className="w-full p-3 rounded-xl border-2 font-bold" placeholder="Link tải tài liệu" value={content} onChange={e=>setContent(e.target.value)}/>}
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2 mt-4">
+                                        <button className="flex-1 bg-brand-blue text-white py-2 rounded-xl font-bold shadow-cartoon btn-cartoon">{editingId ? 'Cập nhật' : 'Lưu lại'}</button>
+                                        {editingId && <button type="button" onClick={resetForm} className="px-4 bg-slate-200 rounded-xl font-bold">Hủy</button>}
+                                    </div>
+                                    {status && <p className="text-center text-sm font-bold text-green-600 mt-2">{status}</p>}
+                                </form>
+                                <div className="bg-white border-2 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                                    {(activeTab === 'map' ? mapItems : (activeTab === 'news' ? adminPosts : adminDocs)).map(item => (
+                                        <div key={item.id} className="p-3 border-b flex justify-between items-center text-sm hover:bg-slate-50">
+                                            <span className="font-bold truncate w-2/3">{item.title || item.label}</span>
+                                            <div className="flex gap-1">
+                                                <button onClick={() => handleEdit(item)} className="text-blue-500 p-1"><Edit size={16}/></button>
+                                                <button onClick={() => handleDelete(activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : 'documents'), item.id)} className="text-red-500 p-1"><Trash2 size={16}/></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="lg:col-span-2">
+                                {activeTab === 'map' ? (
+                                    <div className="h-[500px] bg-slate-100 rounded-2xl border-4 border-slate-200 overflow-hidden relative">
+                                        <InteractiveMap isAdmin={true} onMapClick={handleMapClick} drawingData={drawingData} />
+                                        <div className="absolute top-2 right-2 bg-white/90 p-2 rounded-lg text-xs font-bold shadow z-[1000]">Chế độ chỉnh sửa đang BẬT</div>
                                     </div>
                                 ) : (
-                                    <div className="grid lg:grid-cols-3 gap-6">
-                                        <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
-                                            <form onSubmit={handleSubmit} className="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
-                                                <h3 className="font-bold text-slate-700 mb-3">{editingId ? 'Sửa' : 'Thêm'} {activeTab === 'map' ? 'Điểm' : 'Tin/Văn bản'}</h3>
-                                                <div className="space-y-3">
-                                                    <input required className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm" placeholder="Tiêu đề / Tên điểm" value={title} onChange={e=>setTitle(e.target.value)}/>
-                                                    
-                                                    {activeTab === 'map' ? (
-                                                        <>
-                                                            <div className="grid grid-cols-2 gap-2">
-                                                                <select className="p-2 rounded-xl border-2 font-bold text-sm" value={geometryType} onChange={e=>{setGeometryType(e.target.value); setCoordString(''); setLat(''); setLng('');}}><option value="point">Điểm</option><option value="polyline">Đường</option><option value="polygon">Vùng</option></select>
-                                                                <select className="p-2 rounded-xl border-2 font-bold text-sm" value={markerType} onChange={e=>setMarkerType(e.target.value)}><option value="A">Trường</option><option value="B">Đường</option><option value="C">Nguy cơ</option><option value="D">An toàn</option><option value="E">Chốt trực</option></select>
-                                                            </div>
-                                                            {geometryType === 'point' ? (
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    <input type="number" step="any" className="p-2 rounded-xl border-2 font-bold text-sm" placeholder="Vĩ độ" value={lat} onChange={e=>setLat(e.target.value)}/>
-                                                                    <input type="number" step="any" className="p-2 rounded-xl border-2 font-bold text-sm" placeholder="Kinh độ" value={lng} onChange={e=>setLng(e.target.value)}/>
-                                                                </div>
-                                                            ) : (
-                                                                <textarea className="w-full p-2 rounded-xl border-2 h-20 text-xs font-mono" placeholder="Click bản đồ để vẽ..." value={coordString} readOnly></textarea>
-                                                            )}
-                                                            <p className="text-xs text-brand-blue font-bold italic">💡 Tip: Click lên bản đồ để lấy tọa độ.</p>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <select className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm" value={category} onChange={e=>setCategory(e.target.value)}>
-                                                                {activeTab === 'news' ? <><option>Tin tức</option><option>Gương điển hình</option><option>Kỹ năng</option></> : <><option>Văn bản nội bộ</option><option>Văn bản pháp luật</option><option>Mẫu cam kết</option></>}
-                                                            </select>
-                                                            {activeTab === 'news' ? <SimpleRichTextEditor value={content} onChange={setContent} /> : <input className="w-full p-3 rounded-xl border-2 font-bold text-sm" placeholder="Link tải tài liệu" value={content} onChange={e=>setContent(e.target.value)}/>}
-                                                        </>
-                                                    )}
-                                                </div>
-                                                <div className="flex gap-2 mt-4">
-                                                    <button className="flex-1 bg-brand-blue text-white py-2 rounded-xl font-bold shadow-cartoon btn-cartoon text-sm">{editingId ? 'Cập nhật' : 'Lưu lại'}</button>
-                                                    {editingId && <button type="button" onClick={resetForm} className="px-4 bg-slate-200 rounded-xl font-bold text-sm">Hủy</button>}
-                                                </div>
-                                                {status && <p className="text-center text-sm font-bold text-green-600 mt-2">{status}</p>}
-                                            </form>
-                                            
-                                            <div className="bg-white border-2 rounded-xl overflow-hidden max-h-60 overflow-y-auto shadow-sm">
-                                                {(activeTab === 'map' ? mapItems : (activeTab === 'news' ? adminPosts : adminDocs)).map(item => (
-                                                    <div key={item.id} className="p-3 border-b flex justify-between items-center text-sm hover:bg-slate-50 last:border-b-0">
-                                                        <span className="font-bold truncate w-2/3">{item.title || item.label}</span>
-                                                        <div className="flex gap-1">
-                                                            <button onClick={() => handleEdit(item)} className="text-blue-500 p-1 hover:bg-blue-50 rounded"><Edit size={16}/></button>
-                                                            <button onClick={() => handleDelete(activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : 'documents'), item.id)} className="text-red-500 p-1 hover:bg-red-50 rounded"><Trash2 size={16}/></button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                                { (activeTab === 'map' ? mapItems : (activeTab === 'news' ? adminPosts : adminDocs)).length === 0 && <p className="text-center text-xs text-slate-400 p-4">Danh sách trống</p> }
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="lg:col-span-2 order-1 lg:order-2">
-                                            {activeTab === 'map' ? (
-                                                <div className="h-[400px] lg:h-[600px] bg-slate-100 rounded-2xl border-4 border-slate-200 overflow-hidden relative shadow-inner">
-                                                    <InteractiveMap isAdmin={true} onMapClick={handleMapClick} drawingData={drawingData} />
-                                                    <div className="absolute top-2 right-2 bg-white/90 p-2 rounded-lg text-xs font-bold shadow z-[1000] pointer-events-none text-red-500">🔴 Chế độ Admin: Click để lấy tọa độ</div>
-                                                </div>
-                                            ) : (
-                                                <div className="h-40 lg:h-full flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-bold">
-                                                    Chọn "Bản đồ" để xem trước
-                                                </div>
-                                            )}
-                                        </div>
+                                    <div className="h-full flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-bold">
+                                        Chọn "Bản đồ" để xem trước
                                     </div>
                                 )}
                             </div>
                         </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Little Reporter (Phóng viên Măng non) ---
+        const LittleReporter = () => {
+            const [name, setName] = useState('');
+            const [issueType, setIssueType] = useState('Hư hỏng cơ sở vật chất');
+            const [urgency, setUrgency] = useState('low'); 
+            const [imageLink, setImageLink] = useState('');
+            const [content, setContent] = useState('');
+            const [status, setStatus] = useState('');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setStatus('sending');
+                try {
+                    await addDoc(collection(db, 'reports'), {
+                        name: name || 'Ẩn danh',
+                        type: issueType,
+                        urgency: urgency,
+                        image: imageLink,
+                        content,
+                        status: 'pending', 
+                        createdAt: serverTimestamp(),
+                    });
+                    setStatus('success'); setName(''); setContent(''); setImageLink('');
+                } catch (err) { setStatus('error'); }
+            };
+
+            const urgencyOptions = [
+                { val: 'low', label: 'Bình thường', color: 'bg-traffic-green', icon: '🟢' },
+                { val: 'medium', label: 'Cần chú ý', color: 'bg-traffic-yellow', icon: '🟡' },
+                { val: 'high', label: 'Nguy hiểm!', color: 'bg-traffic-red', icon: '🔴' }
+            ];
+
+            return (
+                <div className="max-w-2xl mx-auto">
+                    <div className="bg-white rounded-3xl p-8 border-4 border-purple-100 shadow-cartoon relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12"><Camera size={100} className="text-purple-600"/></div>
+                        <h2 className="font-display text-3xl font-black text-purple-600 mb-2 flex items-center gap-3"><span className="bg-purple-100 p-2 rounded-xl"><Camera/></span> Phóng viên Măng non</h2>
+                        <p className="text-slate-500 mb-6 font-semibold">Thấy điều gì chưa an toàn? Hãy báo ngay cho Biệt đội Giao thông nhé!</p>
+                        {status === 'success' ? (
+                            <div className="bg-green-50 p-8 rounded-2xl text-center border-2 border-green-200 animate-bounce">
+                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle className="w-10 h-10 text-green-600"/></div>
+                                <h3 className="font-display text-2xl font-bold text-green-700">Đã gửi tin!</h3>
+                                <p className="text-green-800">Cảm ơn bạn đã góp phần giúp trường an toàn hơn.</p>
+                                <button onClick={() => setStatus('')} className="mt-4 font-bold underline text-green-600">Gửi tin khác</button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label className="font-bold text-slate-700 block mb-1">Tên của bạn</label><input className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-purple-400 outline-none" placeholder="VD: Bé Bi lớp 3A" value={name} onChange={e=>setName(e.target.value)} /></div>
+                                    <div><label className="font-bold text-slate-700 block mb-1">Loại sự cố</label><select className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-purple-400 outline-none" value={issueType} onChange={e=>setIssueType(e.target.value)}><option>Biển báo hỏng/mờ</option><option>Hố gà/Đường xấu</option><option>Ùn tắc giao thông</option><option>Đi xe không mũ bảo hiểm</option><option>Khác</option></select></div>
+                                </div>
+                                <div><label className="font-bold text-slate-700 block mb-2">Mức độ khẩn cấp</label><div className="flex gap-2">{urgencyOptions.map(opt => (<button type="button" key={opt.val} onClick={() => setUrgency(opt.val)} className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${urgency === opt.val ? 'border-black shadow-cartoon transform -translate-y-1 ' + opt.color + ' text-white' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>{opt.label}</button>))}</div></div>
+                                <div><label className="font-bold text-slate-700 block mb-1">Mô tả sự việc *</label><textarea required className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 h-24 font-bold focus:border-purple-400 outline-none resize-none" placeholder="Kể chi tiết hơn cho chúng tớ nghe nhé..." value={content} onChange={e=>setContent(e.target.value)}></textarea></div>
+                                <div><label className="font-bold text-slate-700 block mb-1 flex items-center gap-2"><Camera className="w-4 h-4"/> Link Ảnh minh họa (Nếu có)</label><input className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 text-sm focus:border-purple-400 outline-none" placeholder="https://..." value={imageLink} onChange={e=>setImageLink(e.target.value)} /></div>
+                                <button disabled={status === 'sending'} className="w-full bg-purple-600 text-white font-black text-lg py-4 rounded-2xl shadow-cartoon btn-cartoon hover:bg-purple-700 flex items-center justify-center gap-2">{status === 'sending' ? 'Đang gửi...' : <>GỬI BÁO CÁO NGAY <Siren className="animate-pulse"/></>}</button>
+                            </form>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        // --- Login Component (No Demo Button) ---
+        // --- Traffic Quiz ---
+        const TrafficQuiz = () => {
+            const questions = [
+                { q: "Đèn đỏ bật sáng, chúng mình phải làm gì?", a: ["Dừng lại ngay", "Đi tiếp đi", "Đi chậm thôi"], correct: 0 },
+                { q: "Muốn sang đường an toàn, mình đi vào đâu?", a: ["Đi đâu cũng được", "Vạch kẻ đường (ngựa vằn)", "Giữa ngã tư"], correct: 1 },
+                { q: "Ngồi sau xe máy, bé nhớ làm gì?", a: ["Đứng lên yên xe", "Không cần làm gì", "Đội mũ bảo hiểm"], correct: 2 },
+            ];
+            const [idx, setIdx] = useState(0); const [score, setScore] = useState(0); const [finished, setFinished] = useState(false);
+            const handleAns = (i) => { if (i === questions[idx].correct) setScore(score + 1); if (idx < questions.length - 1) setIdx(idx + 1); else setFinished(true); };
+            return (
+                <div className="max-w-2xl mx-auto bg-white rounded-3xl border-b-8 border-r-8 border-traffic-red border-t-2 border-l-2 border-slate-800 p-8 shadow-2xl relative">
+                    <div className="absolute -top-6 -left-6 transform -rotate-12 bg-traffic-yellow px-4 py-2 rounded-lg font-black border-2 border-black shadow-cartoon">ĐỐ VUI!</div>
+                    {!finished ? (
+                        <div className="text-center">
+                            <h3 className="font-display text-2xl font-black text-slate-800 mb-6">{questions[idx].q}</h3>
+                            <div className="grid gap-3">{questions[idx].a.map((ans, i) => (<button key={i} onClick={() => handleAns(i)} className="p-4 rounded-xl bg-slate-50 hover:bg-brand-blue hover:text-white font-bold border-2 border-slate-200 transition-all shadow-sm">{ans}</button>))}</div>
+                            <div className="mt-6 flex justify-center gap-2">{questions.map((_, i) => <div key={i} className={`h-2 w-8 rounded-full ${i === idx ? 'bg-traffic-red' : 'bg-slate-200'}`}></div>)}</div>
+                        </div>
+                    ) : (
+                        <div className="text-center">
+                            <div className="text-6xl mb-4">🏆</div>
+                            <h3 className="font-display text-3xl font-black text-slate-800 mb-2">Hoan hô!</h3>
+                            <p className="text-xl font-bold text-slate-500">Bé trả lời đúng {score}/{questions.length} câu.</p>
+                            <button onClick={() => {setIdx(0); setScore(0); setFinished(false)}} className="mt-6 bg-traffic-green text-white px-8 py-3 rounded-full font-black shadow-cartoon btn-cartoon">Chơi lại nào</button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Login Component ---
         const Login = () => {
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
@@ -636,50 +701,48 @@
             };
 
             return (
-                <div className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.20))] md:min-h-[calc(100vh-theme(spacing.24))] px-4">
-                    <div className="w-full max-w-md bg-white p-8 rounded-3xl border-4 border-traffic-yellow shadow-2xl">
-                        <div className="text-center mb-6">
-                            <div className="w-20 h-20 bg-traffic-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-cartoon text-white">
-                                <Lock size={40} />
-                            </div>
-                            <h2 className="font-display text-3xl font-black text-slate-800">Cổng Đăng Nhập An Ninh</h2>
-                            <p className="text-slate-500 font-bold text-sm">Dành riêng cho Quản trị viên</p>
+                <div className="max-w-md mx-auto bg-white p-8 rounded-3xl border-4 border-traffic-yellow shadow-2xl mt-10">
+                    <div className="text-center mb-6">
+                        <div className="w-20 h-20 bg-traffic-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-cartoon text-white">
+                            <User size={40} />
                         </div>
-
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            <div>
-                                <label className="font-bold text-slate-700 block mb-1">Email</label>
-                                <input 
-                                    type="email" 
-                                    required
-                                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-brand-blue outline-none transition-colors" 
-                                    placeholder="admin@truongnamha.edu.vn"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="font-bold text-slate-700 block mb-1">Mật khẩu</label>
-                                <input 
-                                    type="password" 
-                                    required
-                                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-brand-blue outline-none transition-colors" 
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </div>
-                            
-                            {error && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-sm font-bold text-center border-2 border-red-100">{error}</div>}
-
-                            <button 
-                                disabled={isLoading}
-                                className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-cartoon btn-cartoon hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
-                            >
-                                {isLoading ? 'Đang xác thực...' : <><LogIn size={20}/> Truy cập Hệ thống</>}
-                            </button>
-                        </form>
+                        <h2 className="font-display text-3xl font-black text-slate-800">Đăng nhập Admin</h2>
+                        <p className="text-slate-500 font-bold text-sm">Hệ thống Quản trị An toàn Giao thông</p>
                     </div>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <label className="font-bold text-slate-700 block mb-1">Email</label>
+                            <input 
+                                type="email" 
+                                required
+                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-brand-blue outline-none transition-colors" 
+                                placeholder="example@namha.edu.vn"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="font-bold text-slate-700 block mb-1">Mật khẩu</label>
+                            <input 
+                                type="password" 
+                                required
+                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-3 font-bold focus:border-brand-blue outline-none transition-colors" 
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        
+                        {error && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-sm font-bold text-center border-2 border-red-100">{error}</div>}
+
+                        <button 
+                            disabled={isLoading}
+                            className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-cartoon btn-cartoon hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                        >
+                            {isLoading ? 'Đang xử lý...' : <><LogIn size={20}/> Đăng nhập</>}
+                        </button>
+                    </form>
                 </div>
             );
         };
@@ -693,8 +756,7 @@
             const renderContent = () => {
                 switch(currentPage) {
                     case 'home': return (
-                        // Container chung
-                        <div className="container max-w-7xl mx-auto space-y-12 animate-fade-in px-4 md:px-0">
+                        <div className="space-y-12 animate-fade-in">
                             <div className="bg-traffic-dark rounded-[2.5rem] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl border-b-8 border-slate-900">
                                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle,_#ffffff_2px,_transparent_2px)] bg-[length:20px_20px]"></div>
                                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
@@ -702,7 +764,7 @@
                                         <div className="inline-flex items-center gap-2 bg-traffic-yellow text-slate-900 px-4 py-1 rounded-full font-black text-sm mb-4 transform -rotate-2"><Siren className="w-4 h-4"/> AN TOÀN LÀ BẠN</div>
                                         <h2 className="font-display text-4xl md:text-6xl font-black mb-6 leading-tight">Cổng trường <br/><span className="text-traffic-green">An toàn</span> & <span className="text-brand-blue">Văn minh</span></h2>
                                         <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                                            <button onClick={() => setCurrentPage('map')} className="bg-traffic-red text-white px-8 py-4 rounded-2xl font-black shadow-cartoon btn-cartoon flex items-center gap-2"><Map className="w-6 h-6"/> XEM BẢN ĐỒ</button>
+                                            <button onClick={() => setCurrentPage('map')} className="bg-traffic-red text-white px-8 py-4 rounded-2xl font-black shadow-cartoon btn-cartoon flex items-center gap-2"><MapIcon className="w-6 h-6"/> XEM BẢN ĐỒ</button>
                                             <button onClick={() => setCurrentPage('quiz')} className="bg-white text-traffic-dark px-8 py-4 rounded-2xl font-black shadow-cartoon btn-cartoon border-2 border-slate-200">THI ĐỐ VUI</button>
                                         </div>
                                     </div>
@@ -710,7 +772,6 @@
                                 </div>
                             </div>
                             <div className="zebra-divider" style={{height:'20px', backgroundImage: 'linear-gradient(90deg, #2C3E50 50%, transparent 50%)', backgroundSize: '60px 100%', opacity: 0.1, margin: '2rem 0'}}></div>
-                            
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div onClick={() => setCurrentPage('reporter')} className="bg-purple-100 p-8 rounded-[2rem] border-4 border-purple-200 cursor-pointer hover:bg-purple-200 transition-colors group">
                                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-cartoon text-purple-600 group-hover:scale-110 transition-transform"><Camera className="w-8 h-8"/></div>
@@ -726,7 +787,7 @@
                     case 'reporter': return <LittleReporter />;
                     case 'quiz': return <TrafficQuiz />;
                     case 'admin': return user ? <AdminDashboard onLogout={() => signOut(auth)} /> : <Login />;
-                    case 'map': return <InteractiveMap isAdmin={!!user} />; // Re-enabled Map Component
+                    case 'map': return <InteractiveMap isAdmin={!!user} />; 
                     case 'login': return <Login />;
                     default: return <div className="p-8 text-center font-bold text-slate-500">Nội dung đang được cập nhật...</div>;
                 }
@@ -736,7 +797,7 @@
                 <ErrorBoundary>
                     <div className="min-h-screen pb-20">
                         <Header setCurrentPage={setCurrentPage} user={user} onLogout={() => signOut(auth)} />
-                        <main className="py-8">{renderContent()}</main>
+                        <main className="container mx-auto px-4 py-8">{renderContent()}</main>
                         <footer className="bg-traffic-dark text-white mt-12 py-12 relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-4 bg-white opacity-20 bg-[linear-gradient(90deg,_transparent_50%,_#fff_50%)] bg-[length:50px_100%]"></div>
                             <div className="container mx-auto px-4 text-center">
