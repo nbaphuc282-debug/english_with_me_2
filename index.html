@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biệt Đội Giao Thông Xanh - TH Nam Hà</title>
+    <title>Biệt Đội Giao Thông Xanh - TH Nam Hà test 1</title>
     
     <!-- Google Fonts: Baloo 2 & Nunito -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,7 +56,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Import Map: Đã sửa lại Firebase import sang gstatic để fix lỗi "Service not available" -->
+    <!-- Import Map -->
     <script type="importmap">
     {
       "imports": {
@@ -123,7 +123,7 @@
           Navigation, Info, User, Layout, MapPin, CheckSquare, XCircle,
           Eye, EyeOff, MousePointer2, Undo2, ArrowLeft, Calendar,
           Bold, Italic, Underline, Search, MessageSquare, CheckCircle, HelpCircle, LocateFixed,
-          GraduationCap, BookOpen, Star, Heart, Camera, Flag, Siren, Layers
+          GraduationCap, BookOpen, Star, Heart, Camera, Flag, Siren, Layers, Video
         } from 'lucide-react';
         import { initializeApp } from 'firebase/app';
         import { 
@@ -151,7 +151,6 @@
         }
 
         // --- Firebase Config ---
-        // Lưu ý: Việc để lộ API Key ở frontend là bình thường với Firebase nếu đã config Security Rules chặt chẽ.
         const firebaseConfig = {
           apiKey: "AIzaSyA7A_VxnEqlYMebteU76Om0FnrkVH8Pdl4",
           authDomain: "atgt-6c132.firebaseapp.com",
@@ -404,6 +403,83 @@
             );
         };
 
+        // --- News Feed Component ---
+        const NewsFeed = () => {
+            const [news, setNews] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setNews(data);
+                    setLoading(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            if (loading) return <div className="text-center p-10 font-bold text-slate-400">Đang tải tin tức...</div>;
+
+            return (
+                <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+                    <h2 className="font-display text-3xl font-black text-slate-800 text-center mb-8">
+                        <span className="bg-brand-blue text-white px-4 py-2 rounded-xl shadow-cartoon transform -rotate-2 inline-block">Tin Tức</span> & Sự Kiện
+                    </h2>
+                    <div className="grid gap-6">
+                        {news.map(item => (
+                            <div key={item.id} className="bg-white rounded-3xl p-6 border-b-8 border-r-8 border-slate-200 border-t-2 border-l-2 border-slate-100 shadow-xl relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+                                 <div className="absolute top-0 right-0 bg-traffic-yellow px-4 py-2 rounded-bl-2xl font-black text-xs text-slate-800 uppercase tracking-wider">{item.category || 'Tin tức'}</div>
+                                 <div className="mb-2 text-slate-400 text-xs font-bold flex items-center gap-1">
+                                    <Calendar className="w-3 h-3"/> {item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleDateString('vi-VN') : 'Mới cập nhật'}
+                                 </div>
+                                 <h3 className="font-display text-2xl font-black text-slate-800 mb-3 group-hover:text-brand-blue transition-colors">{item.title}</h3>
+                                 <div className="text-slate-600 prose prose-slate max-w-none font-medium" dangerouslySetInnerHTML={{ __html: item.content }} />
+                            </div>
+                        ))}
+                        {news.length === 0 && <div className="text-center font-bold text-slate-400 py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">Chưa có tin tức nào được đăng.</div>}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Skills Page Component (NEW) ---
+        const SkillsPage = () => {
+            const [skills, setSkills] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const q = query(collection(db, 'skills'), orderBy('createdAt', 'desc'));
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setSkills(data);
+                    setLoading(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            if (loading) return <div className="text-center p-10 font-bold text-slate-400">Đang tải kỹ năng...</div>;
+
+            return (
+                <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+                    <h2 className="font-display text-3xl font-black text-slate-800 text-center mb-8">
+                        <span className="bg-traffic-yellow text-slate-900 px-4 py-2 rounded-xl shadow-cartoon transform rotate-2 inline-block">Góc Kỹ Năng</span> An Toàn
+                    </h2>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {skills.map(item => (
+                            <div key={item.id} className="bg-white rounded-3xl p-6 border-b-8 border-traffic-yellow border-t-2 border-x-2 border-slate-200 shadow-xl relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+                                 <div className="mb-2 text-slate-500 text-xs font-bold flex items-center gap-2 uppercase tracking-wider">
+                                    <BookOpen className="w-4 h-4 text-traffic-yellow"/> {item.category || 'Kỹ năng chung'}
+                                 </div>
+                                 <h3 className="font-display text-xl font-black text-slate-800 mb-3 group-hover:text-yellow-600 transition-colors">{item.title}</h3>
+                                 <div className="text-slate-600 prose prose-slate max-w-none text-sm font-medium" dangerouslySetInnerHTML={{ __html: item.content }} />
+                            </div>
+                        ))}
+                        {skills.length === 0 && <div className="col-span-2 text-center font-bold text-slate-400 py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">Chưa có bài học kỹ năng nào.</div>}
+                    </div>
+                </div>
+            );
+        };
+
         // --- Admin Dashboard ---
         const AdminDashboard = ({ onLogout }) => {
             const [activeTab, setActiveTab] = useState('news'); 
@@ -424,6 +500,7 @@
             // Lists
             const [adminPosts, setAdminPosts] = useState([]);
             const [adminDocs, setAdminDocs] = useState([]);
+            const [adminSkills, setAdminSkills] = useState([]); // State for Skills
             const [mapItems, setMapItems] = useState([]);
             const [reports, setReports] = useState([]);
 
@@ -431,12 +508,13 @@
                 let unsubscribe = () => {};
                 if (activeTab === 'news') { const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setAdminPosts(s.docs.map(d => ({id: d.id, ...d.data()})))); }
                 else if (activeTab === 'docs') { const q = query(collection(db, 'documents'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setAdminDocs(s.docs.map(d => ({id: d.id, ...d.data()})))); }
+                else if (activeTab === 'skills') { const q = query(collection(db, 'skills'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setAdminSkills(s.docs.map(d => ({id: d.id, ...d.data()})))); } // Fetch Skills
                 else if (activeTab === 'map') { const q = query(collection(db, 'map_markers'), orderBy('createdAt', 'desc')); unsubscribe = onSnapshot(q, (s) => setMapItems(s.docs.map(d => ({id: d.id, ...d.data()})))); }
                 else if (activeTab === 'reports') { const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50)); unsubscribe = onSnapshot(q, (s) => setReports(s.docs.map(d => ({id: d.id, ...d.data()})))); }
                 return () => unsubscribe();
             }, [activeTab]);
 
-            const resetForm = () => { setTitle(''); setContent(''); setCategory('Tin tức'); setLat(''); setLng(''); setCoordString(''); setIsVisible(true); setEditingId(null); };
+            const resetForm = () => { setTitle(''); setContent(''); setCategory(activeTab === 'skills' ? 'Đi bộ an toàn' : 'Tin tức'); setLat(''); setLng(''); setCoordString(''); setIsVisible(true); setEditingId(null); };
             
             const handleEdit = (item) => {
                 setEditingId(item.id); setTitle(item.title || item.label); 
@@ -444,11 +522,10 @@
                     setMarkerType(item.type); setGeometryType(item.geometryType || 'point'); setIsVisible(item.isVisible !== false);
                     if (item.geometryType === 'point' || !item.geometryType) { setLat(item.lat); setLng(item.lng); setCoordString(''); }
                     else { 
-                        // Fix: Thêm optional chaining để tránh lỗi nếu item.coordinates không tồn tại
                         setCoordString(item.coordinates?.map(p => p.join(',')).join('; ') || ''); 
                         setLat(''); setLng(''); 
                     }
-                } else { setContent(item.content); setCategory(item.category || 'Tin tức'); }
+                } else { setContent(item.content); setCategory(item.category || (activeTab === 'skills' ? 'Đi bộ an toàn' : 'Tin tức')); }
             };
 
             const handleMapClick = (coords) => {
@@ -460,7 +537,12 @@
             const handleSubmit = async (e) => {
                 e.preventDefault(); setStatus('Đang xử lý...');
                 try {
-                    let col = activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : 'documents');
+                    let col;
+                    if (activeTab === 'map') col = 'map_markers';
+                    else if (activeTab === 'news') col = 'news';
+                    else if (activeTab === 'docs') col = 'documents';
+                    else if (activeTab === 'skills') col = 'skills'; // Set collection for skills
+
                     let data = activeTab === 'map' ? { label: title, type: markerType, geometryType, isVisible } : { title, content, category };
                     if (activeTab === 'map') {
                         if (geometryType === 'point') { data.lat = parseFloat(lat); data.lng = parseFloat(lng); }
@@ -485,6 +567,14 @@
                 } catch(e) { return null; }
             }, [activeTab, geometryType, lat, lng, coordString]);
 
+            // Helper to get list for display
+            const getListToRender = () => {
+                if (activeTab === 'map') return mapItems;
+                if (activeTab === 'news') return adminPosts;
+                if (activeTab === 'skills') return adminSkills;
+                return adminDocs;
+            };
+
             return (
                 <div className="bg-white p-6 rounded-3xl border-4 border-slate-200 shadow-xl mt-6 animate-fade-in">
                     <div className="flex justify-between items-center mb-6 border-b-2 border-slate-100 pb-4">
@@ -494,6 +584,7 @@
                     
                     <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                         <button onClick={() => {setActiveTab('news'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'news' ? 'bg-blue-100 border-blue-500 text-blue-700' : 'border-slate-200 text-slate-500'}`}>📰 Tin tức</button>
+                        <button onClick={() => {setActiveTab('skills'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'skills' ? 'bg-orange-100 border-orange-500 text-orange-700' : 'border-slate-200 text-slate-500'}`}>🎓 Kỹ năng</button>
                         <button onClick={() => {setActiveTab('docs'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'docs' ? 'bg-yellow-100 border-yellow-500 text-yellow-700' : 'border-slate-200 text-slate-500'}`}>📂 Văn bản</button>
                         <button onClick={() => {setActiveTab('map'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'map' ? 'bg-traffic-dark border-slate-800 text-white' : 'border-slate-200 text-slate-500'}`}>🗺️ Bản đồ (GIS)</button>
                         <button onClick={() => {setActiveTab('reports'); resetForm();}} className={`px-4 py-2 rounded-xl font-bold border-2 transition-all whitespace-nowrap ${activeTab === 'reports' ? 'bg-purple-100 border-purple-500 text-purple-700' : 'border-slate-200 text-slate-500'}`}>📡 Báo cáo Măng non</button>
@@ -523,9 +614,9 @@
                         <div className="grid lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-1 space-y-4">
                                 <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
-                                    <h3 className="font-bold text-slate-700 mb-3">{editingId ? 'Sửa' : 'Thêm'} {activeTab === 'map' ? 'Điểm' : 'Tin/Văn bản'}</h3>
+                                    <h3 className="font-bold text-slate-700 mb-3">{editingId ? 'Sửa' : 'Thêm'} {activeTab === 'map' ? 'Điểm' : (activeTab === 'skills' ? 'Bài học Kỹ năng' : 'Tin/Văn bản')}</h3>
                                     <div className="space-y-3">
-                                        <input required className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" placeholder="Tiêu đề / Tên điểm" value={title} onChange={e=>setTitle(e.target.value)}/>
+                                        <input required className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" placeholder="Tiêu đề / Tên bài" value={title} onChange={e=>setTitle(e.target.value)}/>
                                         
                                         {activeTab === 'map' ? (
                                             <>
@@ -546,9 +637,15 @@
                                         ) : (
                                             <>
                                                 <select className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold" value={category} onChange={e=>setCategory(e.target.value)}>
-                                                    {activeTab === 'news' ? <><option>Tin tức</option><option>Gương điển hình</option><option>Kỹ năng</option></> : <><option>Văn bản nội bộ</option><option>Văn bản pháp luật</option><option>Mẫu cam kết</option></>}
+                                                    {activeTab === 'news' ? (
+                                                        <><option>Tin tức</option><option>Gương điển hình</option><option>Sự kiện</option></> 
+                                                    ) : activeTab === 'skills' ? (
+                                                        <><option>Đi bộ an toàn</option><option>Đi xe đạp</option><option>Đội mũ bảo hiểm</option><option>Ngồi sau xe máy</option></>
+                                                    ) : (
+                                                        <><option>Văn bản nội bộ</option><option>Văn bản pháp luật</option><option>Mẫu cam kết</option></>
+                                                    )}
                                                 </select>
-                                                {activeTab === 'news' ? <SimpleRichTextEditor value={content} onChange={setContent} /> : <input className="w-full p-3 rounded-xl border-2 font-bold" placeholder="Link tải tài liệu" value={content} onChange={e=>setContent(e.target.value)}/>}
+                                                {(activeTab === 'news' || activeTab === 'skills') ? <SimpleRichTextEditor value={content} onChange={setContent} /> : <input className="w-full p-3 rounded-xl border-2 font-bold" placeholder="Link tải tài liệu" value={content} onChange={e=>setContent(e.target.value)}/>}
                                             </>
                                         )}
                                     </div>
@@ -559,12 +656,12 @@
                                     {status && <p className="text-center text-sm font-bold text-green-600 mt-2">{status}</p>}
                                 </form>
                                 <div className="bg-white border-2 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
-                                    {(activeTab === 'map' ? mapItems : (activeTab === 'news' ? adminPosts : adminDocs)).map(item => (
+                                    {getListToRender().map(item => (
                                         <div key={item.id} className="p-3 border-b flex justify-between items-center text-sm hover:bg-slate-50">
                                             <span className="font-bold truncate w-2/3">{item.title || item.label}</span>
                                             <div className="flex gap-1">
                                                 <button onClick={() => handleEdit(item)} className="text-blue-500 p-1"><Edit size={16}/></button>
-                                                <button onClick={() => handleDelete(activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : 'documents'), item.id)} className="text-red-500 p-1"><Trash2 size={16}/></button>
+                                                <button onClick={() => handleDelete(activeTab === 'map' ? 'map_markers' : (activeTab === 'news' ? 'news' : (activeTab === 'skills' ? 'skills' : 'documents')), item.id)} className="text-red-500 p-1"><Trash2 size={16}/></button>
                                             </div>
                                         </div>
                                     ))}
@@ -578,8 +675,10 @@
                                         <div className="absolute top-2 right-2 bg-white/90 p-2 rounded-lg text-xs font-bold shadow z-[1000]">Chế độ chỉnh sửa đang BẬT</div>
                                     </div>
                                 ) : (
-                                    <div className="h-full flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-bold">
-                                        Chọn "Bản đồ" để xem trước
+                                    <div className="h-full flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-bold p-8 text-center">
+                                        {activeTab === 'skills' ? 
+                                            "Xem trước nội dung kỹ năng sẽ hiển thị ở trang 'Kỹ năng'. Hãy soạn thảo nội dung phong phú!" 
+                                            : 'Chọn "Bản đồ" để xem trước'}
                                     </div>
                                 )}
                             </div>
@@ -784,6 +883,8 @@
                             </div>
                         </div>
                     );
+                    case 'news': return <NewsFeed />;
+                    case 'skills': return <SkillsPage />; // Add Skills Page
                     case 'reporter': return <LittleReporter />;
                     case 'quiz': return <TrafficQuiz />;
                     case 'admin': return user ? <AdminDashboard onLogout={() => signOut(auth)} /> : <Login />;
